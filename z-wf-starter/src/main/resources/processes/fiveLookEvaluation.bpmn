@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions
+  xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
+  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+
+  id="Definitions_5look"
+  targetNamespace="http://camunda.org/examples">
+
+  <process id="fiveLookEvaluation" name="五看评估流程" isExecutable="true">
+
+    <!-- 开始：CEO/agent 提交一个 opportunity 进入评估 -->
+    <startEvent id="startEvent" name="发现新机会" camunda:initiator="analyst">
+      <extensionElements>
+        <camunda:formField id="opportunityId" type="string" label="机会ID (e.g. OPP-007)" />
+        <camunda:formField id="signalId" type="string" label="触发信号 (e.g. SIG-005)" />
+        <camunda:formField id="source" type="string" label="来源 (e.g. z-biz-news/HN)" />
+      </extensionElements>
+    </startEvent>
+
+    <!-- 1. 市场强度评分 (权重 25%) -->
+    <userTask id="scoreMarket" name="1. 市场需求强度评分" camunda:assignee="${marketScorer}">
+      <extensionElements>
+        <camunda:formField id="marketScore" type="long" label="市场强度 (1-5)">
+          <camunda:validation>
+            <camunda:constraint name="min" config="1" />
+            <camunda:constraint name="max" config="5" />
+          </camunda:validation>
+        </camunda:formField>
+        <camunda:formField id="marketNote" type="string" label="评分理由" />
+      </extensionElements>
+    </userTask>
+
+    <!-- 2. 竞争壁垒评分 (权重 15%) -->
+    <userTask id="scoreBarrier" name="2. 竞争壁垒评分" camunda:assignee="${barrierScorer}">
+      <extensionElements>
+        <camunda:formField id="barrierScore" type="long" label="竞争壁垒 (1-5)">
+          <camunda:validation>
+            <camunda:constraint name="min" config="1" />
+            <camunda:constraint name="max" config="5" />
+          </camunda:validation>
+        </camunda:formField>
+        <camunda:formField id="barrierNote" type="string" label="评分理由" />
+      </extensionElements>
+    </userTask>
+
+    <!-- 3. 启动成本评分 (权重 20%, 分越高越易) -->
+    <userTask id="scoreCost" name="3. 启动成本评分" camunda:assignee="${costScorer}">
+      <extensionElements>
+        <camunda:formField id="costScore" type="long" label="启动成本易度 (1-5, 5=极低)">
+          <camunda:validation>
+            <camunda:constraint name="min" config="1" />
+            <camunda:constraint name="max" config="5" />
+          </camunda:validation>
+        </camunda:formField>
+        <camunda:formField id="costNote" type="string" label="评分理由" />
+      </extensionElements>
+    </userTask>
+
+    <!-- 4. 变现速度评分 (权重 20%) -->
+    <userTask id="scoreMonetize" name="4. 变现速度评分" camunda:assignee="${monetizeScorer}">
+      <extensionElements>
+        <camunda:formField id="monetizeScore" type="long" label="变现速度 (1-5)">
+          <camunda:validation>
+            <camunda:constraint name="min" config="1" />
+            <camunda:constraint name="max" config="5" />
+          </camunda:validation>
+        </camunda:formField>
+        <camunda:formField id="monetizeNote" type="string" label="评分理由" />
+      </extensionElements>
+    </userTask>
+
+    <!-- 5. 可规模化评分 (权重 20%) -->
+    <userTask id="scoreScale" name="5. 可规模化评分" camunda:assignee="${scaleScorer}">
+      <extensionElements>
+        <camunda:formField id="scaleScore" type="long" label="可规模化 (1-5)">
+          <camunda:validation>
+            <camunda:constraint name="min" config="1" />
+            <camunda:constraint name="max" config="5" />
+          </camunda:validation>
+        </camunda:formField>
+        <camunda:formField id="scaleNote" type="string" label="评分理由" />
+      </extensionElements>
+    </userTask>
+
+    <!-- 排他网关：根据综合分决定走向 -->
+    <exclusiveGateway id="decisionGateway" name="综合分 ≥ 3.5?" />
+
+    <!-- 批准 -->
+    <userTask id="approvalTask" name="CEO 终审" camunda:assignee="${ceo}">
+      <extensionElements>
+        <camunda:formField id="finalDecision" type="enum" label="终审决策">
+          <camunda:value id="approved" name="立项通过" />
+          <camunda:value id="rejected" name="拒绝" />
+          <camunda:value id="deferred" name="暂缓" />
+        </camunda:formField>
+        <camunda:formField id="ceoComment" type="string" label="CEO 备注" />
+      </extensionElements>
+    </userTask>
+
+    <!-- 结束事件 -->
+    <endEvent id="approvedEnd" name="立项通过" />
+    <endEvent id="rejectedEnd" name="拒绝" />
+    <endEvent id="deferredEnd" name="暂缓" />
+
+    <!-- 流程连线 -->
+    <sequenceFlow id="flow1" sourceRef="startEvent" targetRef="scoreMarket" />
+    <sequenceFlow id="flow2" sourceRef="scoreMarket" targetRef="scoreBarrier" />
+    <sequenceFlow id="flow3" sourceRef="scoreBarrier" targetRef="scoreCost" />
+    <sequenceFlow id="flow4" sourceRef="scoreCost" targetRef="scoreMonetize" />
+    <sequenceFlow id="flow5" sourceRef="scoreMonetize" targetRef="scoreScale" />
+    <sequenceFlow id="flow6" sourceRef="scoreScale" targetRef="decisionGateway" />
+
+    <!-- 决策网关条件 -->
+    <sequenceFlow id="flow7_high" sourceRef="decisionGateway" targetRef="approvalTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[
+        ${(marketScore*0.25 + barrierScore*0.15 + costScore*0.20 + monetizeScore*0.20 + scaleScore*0.20) >= 3.5}
+      ]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow7_low" sourceRef="decisionGateway" targetRef="rejectedEnd">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[
+        ${(marketScore*0.25 + barrierScore*0.15 + costScore*0.20 + monetizeScore*0.20 + scaleScore*0.20) < 3.5}
+      ]]></conditionExpression>
+    </sequenceFlow>
+
+    <!-- 终审 3 路 -->
+    <sequenceFlow id="flow8_approved" sourceRef="approvalTask" targetRef="approvedEnd">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${finalDecision == 'approved'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow8_rejected" sourceRef="approvalTask" targetRef="rejectedEnd">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${finalDecision == 'rejected'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow8_deferred" sourceRef="approvalTask" targetRef="deferredEnd">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${finalDecision == 'deferred'}]]></conditionExpression>
+    </sequenceFlow>
+  </process>
+
+  <!-- 图形化坐标 -->
+  <bpmndi:BPMNDiagram id="BPMNDiagram_5look">
+    <bpmndi:BPMNPlane id="BPMNPlane_5look" bpmnElement="fiveLookEvaluation">
+      <bpmndi:BPMNShape id="BPMNShape_start" bpmnElement="startEvent">
+        <dc:Bounds x="80" y="160" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_market" bpmnElement="scoreMarket">
+        <dc:Bounds x="160" y="138" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_barrier" bpmnElement="scoreBarrier">
+        <dc:Bounds x="300" y="138" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_cost" bpmnElement="scoreCost">
+        <dc:Bounds x="440" y="138" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_monetize" bpmnElement="scoreMonetize">
+        <dc:Bounds x="580" y="138" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_scale" bpmnElement="scoreScale">
+        <dc:Bounds x="720" y="138" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_gateway" bpmnElement="decisionGateway">
+        <dc:Bounds x="860" y="155" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_approval" bpmnElement="approvalTask">
+        <dc:Bounds x="950" y="138" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_approvedEnd" bpmnElement="approvedEnd">
+        <dc:Bounds x="1100" y="80" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_rejectedEnd" bpmnElement="rejectedEnd">
+        <dc:Bounds x="1100" y="160" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_deferredEnd" bpmnElement="deferredEnd">
+        <dc:Bounds x="1100" y="230" width="36" height="36" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="BPMNEdge_f1" bpmnElement="flow1">
+        <di:waypoint x="116" y="178" /><di:waypoint x="160" y="178" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_f2" bpmnElement="flow2">
+        <di:waypoint x="260" y="178" /><di:waypoint x="300" y="178" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_f3" bpmnElement="flow3">
+        <di:waypoint x="400" y="178" /><di:waypoint x="440" y="178" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_f4" bpmnElement="flow4">
+        <di:waypoint x="540" y="178" /><di:waypoint x="580" y="178" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_f5" bpmnElement="flow5">
+        <di:waypoint x="680" y="178" /><di:waypoint x="720" y="178" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_f6" bpmnElement="flow6">
+        <di:waypoint x="820" y="178" /><di:waypoint x="860" y="180" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_f7h" bpmnElement="flow7_high">
+        <di:waypoint x="910" y="180" /><di:waypoint x="950" y="178" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_f7l" bpmnElement="flow7_low">
+        <di:waypoint x="885" y="205" /><di:waypoint x="885" y="240" /><di:waypoint x="1118" y="240" /><di:waypoint x="1118" y="196" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_f8a" bpmnElement="flow8_approved">
+        <di:waypoint x="1050" y="160" /><di:waypoint x="1100" y="98" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_f8r" bpmnElement="flow8_rejected">
+        <di:waypoint x="1050" y="178" /><di:waypoint x="1118" y="178" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_f8d" bpmnElement="flow8_deferred">
+        <di:waypoint x="1050" y="200" /><di:waypoint x="1100" y="248" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

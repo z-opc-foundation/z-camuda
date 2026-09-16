@@ -1,0 +1,50 @@
+# Build output
+target/
+*.class
+*.jar
+*.war
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Maven
+dependency-reduced-pom.xml
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Frontend (should be in separate repo)
+_frontend/
+_frontend_component/
+node_modules/
+
+# Docker
+dockerfile
+docker-compose.yml
+
+# Scripts
+build.sh
+package.sh
+push.sh
+
+# Claude
+.claude/
+CLAUDE.md
+
+# Playwright
+.playwright-mcp/
+
+# SQL
+*.sql
+
+# ===== Git 本地备份目录 (历史塌缩用) =====
+.git.bak.*/

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.github.yuku123</groupId>
+        <artifactId>z-wf</artifactId>
+        <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <groupId>io.github.yuku123</groupId>
+
+    <artifactId>z-wf-core</artifactId>
+    <name>z-wf-core</name>
+    <description>工作流引擎核心模块 — Camunda 封装 + 钩子接口</description>
+    <url>https://github.com/yuku123/z-opc-foundation/tree/main/z-wf/z-wf-core</url>
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <id>yuku123</id>
+            <name>zifang</name>
+            <email>yuku123@users.noreply.github.com</email>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:git://github.com/yuku123/z-opc-foundation.git</connection>
+        <developerConnection>scm:git:ssh://github.com/yuku123/z-opc-foundation.git</developerConnection>
+        <url>https://github.com/yuku123/z-opc-foundation/tree/main/z-wf</url>
+    </scm>
+
+    <dependencies>
+        <!-- Camunda -->
+        <dependency>
+            <groupId>org.camunda.bpm.springboot</groupId>
+            <artifactId>camunda-bpm-spring-boot-starter</artifactId>
+        </dependency>
+
+        <!-- Spring Boot -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

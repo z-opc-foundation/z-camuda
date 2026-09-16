@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>io.github.yuku123</groupId>
+  <artifactId>z-wf-web</artifactId>
+  <version>1.0.4</version>
+  <name>z-wf-web</name>
+  <description>工作流引擎 Web 模块 — REST API + 审批中心</description>
+  <url>https://github.com/yuku123/z-opc-foundation/tree/main/z-wf/z-wf-web</url>
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>yuku123</id>
+      <name>zifang</name>
+      <email>yuku123@users.noreply.github.com</email>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:git://github.com/yuku123/z-opc-foundation.git</connection>
+    <developerConnection>scm:git:ssh://github.com/yuku123/z-opc-foundation.git</developerConnection>
+    <url>https://github.com/yuku123/z-opc-foundation/tree/main/z-wf</url>
+  </scm>
+  <dependencies>
+    <dependency>
+      <groupId>io.github.yuku123</groupId>
+      <artifactId>z-wf-core</artifactId>
+      <version>1.0.4</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+      <version>2.7.12</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.swagger.core.v3</groupId>
+      <artifactId>swagger-annotations</artifactId>
+      <version>2.2.8</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.github.yuku123</groupId>
+      <artifactId>z-util-core</artifactId>
+      <version>1.0.10</version>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.18.26</version>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
+  </dependencies>
+</project>

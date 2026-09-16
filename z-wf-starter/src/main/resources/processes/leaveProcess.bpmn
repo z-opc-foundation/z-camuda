@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions
+  xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
+  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+
+  id="Definitions_leave"
+  targetNamespace="http://camunda.org/examples">
+
+  <!-- 流程核心逻辑 -->
+  <process id="leaveProcess" name="员工请假流程" isExecutable="true">
+    <!-- 开始事件：绑定申请人变量，包含请假天数/原因表单 -->
+    <startEvent id="startEvent" name="开始请假" camunda:initiator="applicant">
+      <extensionElements>
+        <camunda:formField id="days" type="integer" label="请假天数">
+          <camunda:validation>
+            <camunda:constraint name="min" config="1" />
+          </camunda:validation>
+        </camunda:formField>
+        <camunda:formField id="reason" type="string" label="请假原因" />
+      </extensionElements>
+    </startEvent>
+
+    <!-- 审批任务：绑定审批人变量，包含审批结果表单 -->
+    <userTask id="approveTask" name="审批请假" camunda:assignee="${approver}">
+      <extensionElements>
+        <camunda:formField id="approvalResult" type="enum" label="审批结果">
+          <camunda:value id="approved" name="批准" />
+          <camunda:value id="rejected" name="拒绝" />
+        </camunda:formField>
+      </extensionElements>
+    </userTask>
+
+    <!-- 排他网关：审批结果判断 -->
+    <exclusiveGateway id="approvalGateway" name="审批结果判断" />
+
+    <!-- 结束事件 -->
+    <endEvent id="approvedEndEvent" name="已批准" />
+    <endEvent id="rejectedEndEvent" name="已拒绝" />
+
+    <!-- 流程连线（包含条件表达式） -->
+    <sequenceFlow id="startToApprove" sourceRef="startEvent" targetRef="approveTask" />
+    <sequenceFlow id="approveToGateway" sourceRef="approveTask" targetRef="approvalGateway" />
+
+    <sequenceFlow id="gatewayToApproved" sourceRef="approvalGateway" targetRef="approvedEndEvent">
+      <conditionExpression xsi:type="tFormalExpression">
+        ${approvalResult == 'approved'}
+      </conditionExpression>
+    </sequenceFlow>
+
+    <sequenceFlow id="gatewayToRejected" sourceRef="approvalGateway" targetRef="rejectedEndEvent">
+      <conditionExpression xsi:type="tFormalExpression">
+        ${approvalResult == 'rejected'}
+      </conditionExpression>
+    </sequenceFlow>
+  </process>
+
+  <!-- 图形化渲染信息（解决no diagram to display问题） -->
+  <bpmndi:BPMNDiagram id="BPMNDiagram_leaveProcess">
+    <bpmndi:BPMNPlane id="BPMNPlane_leaveProcess" bpmnElement="leaveProcess">
+      <!-- 开始事件坐标 -->
+      <bpmndi:BPMNShape id="BPMNShape_startEvent" bpmnElement="startEvent">
+        <dc:Bounds x="100" y="100" width="36" height="36" />
+      </bpmndi:BPMNShape>
+
+      <!-- 审批任务坐标 -->
+      <bpmndi:BPMNShape id="BPMNShape_approveTask" bpmnElement="approveTask">
+        <dc:Bounds x="200" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+
+      <!-- 排他网关坐标 -->
+      <bpmndi:BPMNShape id="BPMNShape_approvalGateway" bpmnElement="approvalGateway">
+        <dc:Bounds x="350" y="100" width="50" height="50" />
+      </bpmndi:BPMNShape>
+
+      <!-- 批准结束事件坐标 -->
+      <bpmndi:BPMNShape id="BPMNShape_approvedEndEvent" bpmnElement="approvedEndEvent">
+        <dc:Bounds x="450" y="70" width="36" height="36" />
+      </bpmndi:BPMNShape>
+
+      <!-- 拒绝结束事件坐标 -->
+      <bpmndi:BPMNShape id="BPMNShape_rejectedEndEvent" bpmnElement="rejectedEndEvent">
+        <dc:Bounds x="450" y="130" width="36" height="36" />
+      </bpmndi:BPMNShape>
+
+      <!-- 连线坐标 -->
+      <bpmndi:BPMNEdge id="BPMNEdge_startToApprove" bpmnElement="startToApprove">
+        <di:waypoint x="136" y="118" />
+        <di:waypoint x="200" y="120" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="BPMNEdge_approveToGateway" bpmnElement="approveToGateway">
+        <di:waypoint x="300" y="120" />
+        <di:waypoint x="350" y="125" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="BPMNEdge_gatewayToApproved" bpmnElement="gatewayToApproved">
+        <di:waypoint x="400" y="100" />
+        <di:waypoint x="450" y="88" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="BPMNEdge_gatewayToRejected" bpmnElement="gatewayToRejected">
+        <di:waypoint x="400" y="150" />
+        <di:waypoint x="450" y="148" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>
