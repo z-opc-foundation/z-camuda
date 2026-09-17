@@ -41,10 +41,16 @@
             <artifactId>z-wf-core</artifactId>
         </dependency>
 
-        <!-- Spring Boot Web -->
+        <!-- Spring Boot Web（排除默认 logging — 由 starter 层引入 log4j2 替换） -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Swagger API 文档注解 (版本由 parent dependencyManagement 锁定) -->

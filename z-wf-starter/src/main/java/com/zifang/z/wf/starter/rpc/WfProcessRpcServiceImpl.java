@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 import org.camunda.bpm.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,6 +34,7 @@ import java.util.Map;
  */
 @Service
 @ConditionalOnClass(name = "com.zifang.z.rpc.annotation.ZRpcService")
+@ConditionalOnProperty(prefix = "z.rpc", name = "enabled", matchIfMissing = true)
 @ZRpcService(interfaceClass = WfProcessRpcService.class, version = "1.0.0")
 public class WfProcessRpcServiceImpl implements WfProcessRpcService {
 

@@ -110,11 +110,23 @@
                 <artifactId>z-util-core</artifactId>
                 <version>1.0.10</version>
             </dependency>
-            <!-- log4j2 (SPI Registry 日志) -->
+            <!-- log4j2 (SPI Registry 日志) — 与 z-boot BOM 保持一致 2.25.4 -->
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-api</artifactId>
-                <version>2.17.2</version>
+                <version>2.25.4</version>
+            </dependency>
+            <!-- log4j-core 跟随 log4j-api 同版本 -->
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>2.25.4</version>
+            </dependency>
+            <!-- log4j-slf4j2-impl 跟随 z-boot BOM 2.26.1（与 slf4j-api 2.x 兼容） -->
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-slf4j2-impl</artifactId>
+                <version>2.26.1</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

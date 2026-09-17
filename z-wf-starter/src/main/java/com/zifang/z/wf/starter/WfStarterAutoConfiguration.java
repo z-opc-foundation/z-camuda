@@ -18,10 +18,11 @@ import org.springframework.context.annotation.Configuration;
                 "com.zifang.z.wf.web.api",
                 "com.zifang.z.wf.core",
                 "com.zifang.z.wf.starter.rpc",
-                "com.zifang.z.wf.starter",
-                // 显式扫 z-rpc 包, 确保 ZRpcServiceExporter (BeanPostProcessor) 能被 Spring 容器创建
-                // (它的 @Component 注解需要 ComponentScan 触发才能生效)
-                "com.zifang.z.rpc.starter.config"
+                "com.zifang.z.wf.starter"
+                // 注意：原本这里显式扫 com.zifang.z.rpc.starter.config 已被移除 —
+                // z-rpc 通过 spring.factories / 自动装配机制加载，
+                // 显式扫会导致 z.rpc.enabled=false 时 ZRpcServerAutoConfiguration 被独立加载，
+                // 找不到 ZRpcProperties 报错.
         }
 )
 public class WfStarterAutoConfiguration {
