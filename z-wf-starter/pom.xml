@@ -103,6 +103,13 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- 端到端测试 (JUnit 5 + Spring Boot Test) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <!-- log4j2 core (运行时实际日志实现 — Spring Boot 启动需要) -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
