@@ -40,11 +40,16 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <version>1.18.26</version>
+      <groupId>io.github.yuku123</groupId>
+      <artifactId>z-util-core</artifactId>
+      <version>1.0.10</version>
       <scope>compile</scope>
-      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>2.17.2</version>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
 </project>
