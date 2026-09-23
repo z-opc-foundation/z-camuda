@@ -1,12 +1,12 @@
 #!/bin/bash
 # ============================================================
-# z-wf-client.sh — 外部应用通过 z-rpc 直连 z-wf-server
-# 演示: 业务流程 (启动 → 待办查询 → 审批) 完整端到端打通
+# wf-demo.sh — z-wf 端到端演示 (REST API + 健康检查)
+# 演示: 健康检查 → 流程定义 → 启动请假流程
 # ============================================================
 # 用法:
-#   ./z-wf-client.sh start alice bob 3 sick-leave   # 启动请假流程
-#   ./z-wf-client.sh todos bob                       # 查询待办
-#   ./z-wf-client.sh complete <taskId> approved      # 审批通过
+#   ./wf-demo.sh health                          # 健康检查
+#   ./wf-demo.sh definitions                     # 列出流程定义
+#   ./wf-demo.sh start alice bob 3 sick-leave    # 启动请假流程
 # ============================================================
 set -e
 
@@ -22,10 +22,10 @@ shift || true
 APPLICANT="${1:-alice}"
 APPROVER="${2:-bob}"
 DAYS="${3:-3}"
-REASON="${4:-test-from-zwf-client}"
+REASON="${4:-test-from-wf-demo}"
 
-log() { echo -e "\033[32m[zwf-client]\033[0m $1"; }
-warn() { echo -e "\033[33m[zwf-client]\033[0m $1"; }
+log() { echo -e "\033[32m[wf-demo]\033[0m $1"; }
+warn() { echo -e "\033[33m[wf-demo]\033[0m $1"; }
 
 case "$ACTION" in
   health)
@@ -48,13 +48,8 @@ case "$ACTION" in
     echo "$RESP" | python3 -m json.tool
     log "✓ 流程已启动, 返回 processInstanceId"
     ;;
-  start-rpc)
-    log "通过 z-rpc Netty 直连 z-wf 调 startLeaveProcess"
-    java -cp "$(cat /tmp/zwf-cp.txt):/Users/zifang/.m2/repository/io/github/yuku123/z-wf-starter/1.0.0/z-wf-starter-1.0.0.jar:/Users/zifang/.m2/repository/io/github/yuku123/z-wf-core/1.0.0/z-wf-core-1.0.0.jar:/Users/zifang/.m2/repository/io/github/yuku123/z-wf-web/1.0.0/z-wf-web-1.0.0.jar" \
-      com.zifang.z.wf.client.ZWfRpcClient "${Z_WF_RPC_HOST}" "${Z_WF_RPC_PORT}" start "${APPLICANT}" "${APPROVER}" "${DAYS}" "${REASON}"
-    ;;
   help|*)
-    echo "用法: $0 {health|rpc-port|definitions|start|start-rpc} [args]"
+    echo "用法: $0 {health|rpc-port|definitions|start} [args]"
     echo ""
     echo "Commands:"
     echo "  health                       REST API 健康检查"
@@ -62,7 +57,5 @@ case "$ACTION" in
     echo "  definitions                  列出已部署的流程定义"
     echo "  start [applicant] [approver] [days] [reason]"
     echo "                               REST API 启动请假流程"
-    echo "  start-rpc [applicant] [approver] [days] [reason]"
-    echo "                               z-rpc 直接调 z-wf 启动请假流程"
     ;;
 esac

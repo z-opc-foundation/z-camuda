@@ -54,7 +54,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- CI-friendly versions 根 -->
-        <revision>1.0.4</revision>
+        <revision>1.0.5</revision>
 
         <!-- 版本管理 - 全部走 z-boot BOM 统一管理 -->
         <z-boot.version>1.0.7</z-boot.version>

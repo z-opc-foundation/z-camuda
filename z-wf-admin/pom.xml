@@ -19,14 +19,14 @@
 
     <groupId>io.github.yuku123</groupId>
     <artifactId>z-wf-admin</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
     <packaging>jar</packaging>
     <name>z-wf :: admin (Standalone App, NOT published to Central)</name>
     <description>Z-WF 独立可启动应用 — Camunda 引擎 + 审批中心 REST + 自带管理前端. 不发 Maven Central.</description>
 
     <properties>
         <!-- 与 ../pom.xml <revision> 同步 -->
-        <z-wf.version>1.0.4</z-wf.version>
+        <z-wf.version>1.0.5</z-wf.version>
         <maven.deploy.skip>true</maven.deploy.skip>
         <java.version>8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -53,10 +53,11 @@
             <version>1.0.2</version>
         </dependency>
 
-        <!-- MySQL (流程引擎持久化) -->
+        <!-- MySQL (流程引擎持久化, 旧坐标 boot BOM 不管理, 与 z-wf parent 锁同版) -->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.33</version>
         </dependency>
 
         <!-- Druid 连接池 -->
@@ -99,12 +100,15 @@
 
     <build>
         <plugins>
-            <!-- 可执行 fat jar 打包 (classifier=exec: 主 artifact 保持 thin jar, 对齐 z-schedule-admin) -->
+            <!-- 可执行 fat jar 打包 (classifier=exec: 主 artifact 保持 thin jar, 对齐 z-schedule-admin).
+                 execution id 必须写成 repackage 以覆盖 spring-boot-starter-parent 自带的同名 execution,
+                 否则会触发两次 repackage (主 jar 被替换成 fat + exec jar 再 attach 一次) -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>repackage</id>
                         <goals><goal>repackage</goal></goals>
                         <configuration>
                             <classifier>exec</classifier>

@@ -1,0 +1,107 @@
+# z-wf Docker Compose — 三服务编排 (mysql + z-config 注册中心 + z-wf 服务端)
+#
+# 使用:
+#   docker compose up -d          # 启动
+#   docker compose ps             # 查看状态
+#   docker compose logs -f z-wf   # 查看 z-wf 日志
+#   docker compose down           # 停止
+#
+# 端口映射:
+#   z-config-server  -> 8848 (Netty + HTTP)
+#   z-wf-server      -> 8080 (REST API + 管理前端)
+
+version: '3.8'
+
+services:
+  # ============================================================
+  # MySQL (z-config + camunda 共享; 生产环境建议拆开)
+  # ============================================================
+  mysql:
+    image: mysql:8.0
+    container_name: zwf-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: zconfig
+      MYSQL_USER: zconfig
+      MYSQL_PASSWORD: zconfig_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    networks:
+      - zwf-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot123"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ============================================================
+  # z-config-server (服务注册中心 + 配置中心)
+  # ============================================================
+  z-config:
+    build:
+      context: ../z-config
+      dockerfile: Dockerfile
+      additional_contexts:
+        - maven-m2=${HOST_M2:-${HOME}/.m2}
+    image: ${ZCONFIG_IMAGE:-z-config:latest}
+    container_name: zwf-zconfig
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/zconfig?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false
+      SPRING_DATASOURCE_USERNAME: zconfig
+      SPRING_DATASOURCE_PASSWORD: zconfig_pass
+    ports:
+      - "8848:8848"
+    networks:
+      - zwf-network
+    restart: unless-stopped
+
+  # ============================================================
+  # z-wf-server (工作流引擎服务端, 注册到 z-config)
+  # ============================================================
+  z-wf:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${ZWF_IMAGE:-z-wf:latest}
+    container_name: zwf-server
+    depends_on:
+      - z-config
+      - mysql
+    environment:
+      JVM_OPTS: "-Xms512m -Xmx1024m"
+      # Camunda 数据源
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/camunda?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root123
+      # Camunda 自动建表
+      CAMUNDA_BPM_DATABASE_SCHEMA_UPDATE: "true"
+      CAMUNDA_BPM_AUTO_DEPLOYMENT_ENABLED: "true"
+      # z-config 注册中心
+      Z_CONFIG_ENABLED: "true"
+      Z_CONFIG_SERVER_ADDR: z-config:8848
+      Z_CONFIG_NAMESPACE: docker
+      # z-rpc 服务端
+      Z_RPC_ENABLED: "true"
+      Z_RPC_PROTOCOL: zrpc
+      Z_RPC_REGISTRY_TYPE: z-config
+      Z_RPC_REGISTRY_ADDRESS: z-config:8848
+      Z_RPC_SERVICE: z-wf
+    ports:
+      - "8080:8080"
+    networks:
+      - zwf-network
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+
+networks:
+  zwf-network:
+    driver: bridge

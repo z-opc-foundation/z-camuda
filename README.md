@@ -19,7 +19,7 @@
 <dependency>
     <groupId>io.github.yuku123</groupId>
     <artifactId>z-wf-starter</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
 </dependency>
 ```
 
@@ -61,7 +61,7 @@ public class WfApplication {
 <dependency>
     <groupId>io.github.yuku123</groupId>
     <artifactId>z-wf-starter</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
 </dependency>
 
 <!-- 配置中心 + 注册中心 -->
@@ -131,7 +131,7 @@ public WfProcessHook rpcWfHook(@Autowired WfProcessService rpcService) {
 
 ## 📦 模块结构
 
-> groupId: `io.github.yuku123` · version: **1.0.4**
+> groupId: `io.github.yuku123` · version: **1.0.5**
 
 | 模块 | 说明 | 何时该引入 |
 |---|---|---|
@@ -160,7 +160,7 @@ public WfProcessHook rpcWfHook(@Autowired WfProcessService rpcService) {
 
 ```
 z-wf/
-├── pom.xml                          # 自给自足 parent (1.0.4)
+├── pom.xml                          # 自给自足 parent (1.0.5)
 ├── z-wf-core/                       # 核心模块 + 钩子接口 ✅
 ├── z-wf-web/                        # REST API + DTO + Controller ✅
 ├── z-wf-starter/                    # 自动装配 starter (可选 z-config/z-rpc 集成) ✅
@@ -172,7 +172,7 @@ z-wf/
 │   └── src/main/resources/
 │       └── static/                       # Z-WF 自带管理前端
 ├── Dockerfile                       # Docker 镜像构建 (Eclipse Temurin 8 JRE)
-├── docker-compose.yml               # 三服务编排 (z-config + z-wf + z-wf-client)
+├── docker-compose.yml               # 三服务编排 (mysql + z-config + z-wf)
 ├── start.sh                         # 本地一键启停
 ├── install-settings.sh              # 写入 Maven Central 凭证到 ~/.m2
 ├── deploy_maven_center.sh           # 发布到 Maven Central
@@ -195,12 +195,9 @@ curl http://localhost:8080/api/wf/health
 
 # z-config 注册中心
 curl http://localhost:8848/api/health
-
-# 通过 z-wf-client 调用 RPC (需要先注册到 z-config)
-curl http://localhost:8081/wf-client/api/call/start?processKey=leaveProcess
 ```
 
-### 三服务架构
+### 服务架构
 
 ```
 ┌────────────────────────────────────────────────────────────┐
@@ -217,16 +214,10 @@ curl http://localhost:8081/wf-client/api/call/start?processKey=leaveProcess
 │  ─ 启动时 ZNamingService.registerInstance("z-wf", ...)     │
 │  ─ @ZRpcService 暴露 WfProcessService                       │
 └────────────────────────────────────────────────────────────┘
-          ▲
-          │ RPC call (Netty + Hessian2)
-          │
-┌────────────────────────────────────────────────────────────┐
-│  z-wf-client (port 8081)                                    │
-│  ─ z-config-spring-boot-starter (订阅 z-wf 实例)            │
-│  ─ z-rpc-spring-boot-starter (RPC 客户端)                  │
-│  ─ @ZRpcReference(WfProcessService.class) 远程调用          │
-└────────────────────────────────────────────────────────────┘
 ```
+
+外部应用接入方式: 引入 `z-rpc-spring-boot-starter` 后用
+`@ZRpcReference(WfProcessService.class)` 注入即可远程调用 (实例从 z-config 发现)。
 
 ---
 
@@ -334,6 +325,6 @@ bash deploy_maven_center.sh publish            # 发布到 Maven Central (本地
 - [`_doc/003_script/`](_doc/003_script/) — 运维脚本:
   - [`deploy_maven_center.sh`](_doc/003_script/deploy_maven_center.sh)
   - [`install-settings.sh`](_doc/003_script/install-settings.sh)
-  - [`z-wf-client.sh`](_doc/003_script/z-wf-client.sh)
+  - [`wf-demo.sh`](_doc/003_script/wf-demo.sh)
 
 各文档详细说明见各子目录。

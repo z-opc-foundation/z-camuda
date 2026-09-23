@@ -10,6 +10,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 ACTION="${1:-publish}"
 
 # 颜色
@@ -27,7 +28,7 @@ err() { echo -e "${RED}[deploy]${NC} $1"; exit 1; }
 # ============================================================
 verify_pom() {
     log "验证 POM 元信息..."
-    cd "$SCRIPT_DIR"
+    cd "$REPO_ROOT"
 
     # 检查 Central 所需字段
     local required_fields=("name" "description" "url" "licenses" "developers" "scm")
@@ -48,7 +49,7 @@ verify_pom() {
 # ============================================================
 publish() {
     log "开始发布 z-wf 到 Maven Central..."
-    cd "$SCRIPT_DIR"
+    cd "$REPO_ROOT"
 
     # 1. 清理
     log "1/4 清理..."
@@ -62,9 +63,9 @@ publish() {
     log "3/4 安装到本地仓库..."
     mvn install -DskipTests -q
 
-    # 4. 发布
+    # 4. 发布 (central profile: sources + javadoc + gpg 签名 + Central Portal 上传)
     log "4/4 发布到 Maven Central..."
-    mvn deploy -DskipTests 2>&1 | tee /tmp/z-wf-deploy.log
+    mvn deploy -Pcentral -DskipTests 2>&1 | tee /tmp/z-wf-deploy.log
 
     # 检查结果
     if grep -q "BUILD SUCCESS" /tmp/z-wf-deploy.log; then
@@ -75,7 +76,7 @@ publish() {
 
     # 提取 Deployment ID
     local deployment_id
-    deployment_id=$(grep -o 'Deployment [a-f0-9\-]*' /tmp/z-wf-deploy.log | head -1 | awk '{print $2}')
+    deployment_id=$(grep -o 'deploymentId: [a-f0-9\-]*' /tmp/z-wf-deploy.log | head -1 | awk '{print $2}')
     if [ -n "$deployment_id" ]; then
         log "✅ Bundle uploaded"
         log "   Deployment ID: $deployment_id"

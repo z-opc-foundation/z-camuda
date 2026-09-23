@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.yuku123</groupId>
   <artifactId>z-wf</artifactId>
-  <version>1.0.4</version>
+  <version>1.0.5</version>
   <packaging>pom</packaging>
   <name>z-wf (Workflow Engine)</name>
   <description>基于 Camunda 的工作流引擎, 支持流程定义、任务管理、审批中心。提供钩子接口供业务方扩展。</description>

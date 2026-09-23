@@ -27,10 +27,6 @@ _frontend/
 _frontend_component/
 node_modules/
 
-# Docker
-dockerfile
-docker-compose.yml
-
 # Scripts
 build.sh
 package.sh
