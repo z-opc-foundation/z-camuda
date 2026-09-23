@@ -14,7 +14,7 @@
 
     <artifactId>z-wf-starter</artifactId>
     <name>z-wf-starter</name>
-    <description>工作流引擎全栈服务端 — 集成 Camunda + REST API + z-config 服务注册 + z-rpc RPC 服务</description>
+    <description>工作流引擎 Spring Boot Starter — 自动装配 Camunda 引擎 + 审批中心 REST + 可选 z-config/z-rpc 集成 (可运行应用见 z-wf-admin)</description>
     <url>https://github.com/yuku123/z-opc-foundation/tree/main/z-wf/z-wf-starter</url>
     <licenses>
         <license>
@@ -45,13 +45,7 @@
             <artifactId>z-wf-web</artifactId>
         </dependency>
 
-        <!-- Camunda Web Starter (提供 Camunda REST API + Web Console) -->
-        <dependency>
-            <groupId>org.camunda.bpm.springboot</groupId>
-            <artifactId>camunda-bpm-spring-boot-starter-webapp</artifactId>
-        </dependency>
-
-        <!-- ========== 全栈服务端集成 (optional, 业务方不用就不加载) ========== -->
+        <!-- ========== 可选集成 (业务方 classpath 不含就不加载) ========== -->
         <!-- z-config 服务注册中心 (让 z-wf 自动注册到 z-config, 让其他服务发现 z-wf 实例) -->
         <dependency>
             <groupId>io.github.yuku123</groupId>
@@ -68,72 +62,10 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- MySQL (流程引擎持久化) -->
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <!-- Druid 连接池 -->
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>druid-spring-boot-starter</artifactId>
-            <version>1.2.18</version>
-            <optional>true</optional>
-        </dependency>
-
-        <!-- Swagger API 文档 (版本由 parent dependencyManagement 锁定) -->
-        <dependency>
-            <groupId>io.swagger.core.v3</groupId>
-            <artifactId>swagger-annotations</artifactId>
-        </dependency>
-
-        <!-- Knife4j API 文档 -->
-        <dependency>
-            <groupId>com.github.xiaoymin</groupId>
-            <artifactId>knife4j-openapi3-spring-boot-starter</artifactId>
-            <version>4.1.0</version>
-        </dependency>
-
-        <!-- H2 内存数据库（端到端测试用） -->
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <!-- 端到端测试 (JUnit 5 + Spring Boot Test) -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- log4j2 core (运行时实际日志实现 — Spring Boot 启动需要) -->
+        <!-- log4j2 API (WfServerLifecycle / audit SPI 直接使用 LogManager) -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-        </dependency>
-
-        <!-- spring-boot-starter-log4j2 (把默认 logback 替换为 log4j2) -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-log4j2</artifactId>
-        </dependency>
-
-        <!-- 显式升级 slf4j-api 到 2.0.x — 解决 druid 拉 slf4j 1.7 + log4j-slf4j2-impl 2.26 冲突 -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>2.0.16</version>
-        </dependency>
-
-        <!-- Lombok -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
+            <artifactId>log4j-api</artifactId>
         </dependency>
     </dependencies>
 
@@ -142,11 +74,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-            <!-- Spring Boot Maven Plugin (支持 spring-boot:run 启动 + 可执行 jar 打包) -->
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

@@ -40,6 +40,11 @@
         <module>z-wf-core</module>
         <module>z-wf-web</module>
         <module>z-wf-starter</module>
+        <!--
+            z-wf-admin: 独立可启动应用, 留 reactor 享受统一构建, 但 own-parent +
+            maven.deploy.skip=true, 永远不上 Maven Central (对齐 z-schedule-admin).
+        -->
+        <module>z-wf-admin</module>
     </modules>
 
     <properties>

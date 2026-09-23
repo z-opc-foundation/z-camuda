@@ -99,7 +99,7 @@ public class ZWfRpcClient {
                 System.out.println("说明:");
                 System.out.println("  - 流程已通过 z-rpc 在 z-wf-server 启动");
                 System.out.println("  - 现在可以通过 REST API 查询待办: GET /api/approval-center/tasks/get?taskId=");
-                System.out.println("  - 或在 Camunda 控制台查看: http://localhost:18080/camunda/app/cockpit/");
+                System.out.println("  - 或在管理前端查看: http://localhost:18080/ (z-wf-admin 自带管理前端)");
             } else {
                 System.err.println("未知 action: " + action);
             }

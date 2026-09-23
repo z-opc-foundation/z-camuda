@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+        z-wf-admin: 独立可启动应用 (docker 镜像源 / 本地 java -jar 演示), 永不上 Maven Central.
+        对齐 z-schedule-admin 模式: own-parent (spring-boot-starter-parent) + maven.deploy.skip=true.
+        <version> 与依赖的 z-wf-starter 版本必须与 ../pom.xml 的 <revision> 保持一致.
+        本地启动: mvn spring-boot:run  (端口/context-path 见 application.properties)
+    -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.7.12</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>io.github.yuku123</groupId>
+    <artifactId>z-wf-admin</artifactId>
+    <version>1.0.4</version>
+    <packaging>jar</packaging>
+    <name>z-wf :: admin (Standalone App, NOT published to Central)</name>
+    <description>Z-WF 独立可启动应用 — Camunda 引擎 + 审批中心 REST + 自带管理前端. 不发 Maven Central.</description>
+
+    <properties>
+        <!-- 与 ../pom.xml <revision> 同步 -->
+        <z-wf.version>1.0.4</z-wf.version>
+        <maven.deploy.skip>true</maven.deploy.skip>
+        <java.version>8</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <!-- z-wf 全栈: core (Camunda 引擎) + web (REST) + starter (自动装配 + z-config/z-rpc 可选集成) -->
+        <dependency>
+            <groupId>io.github.yuku123</groupId>
+            <artifactId>z-wf-starter</artifactId>
+            <version>${z-wf.version}</version>
+        </dependency>
+
+        <!-- z-config 服务注册 + z-rpc RPC 暴露 (starter 里是 optional 不传递,
+             独立部署形态必须在此显式声明, 否则 WfServerLifecycle 的服务注册失效) -->
+        <dependency>
+            <groupId>io.github.yuku123</groupId>
+            <artifactId>z-config-spring-boot-starter</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.yuku123</groupId>
+            <artifactId>z-rpc-spring-boot-starter</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+
+        <!-- MySQL (流程引擎持久化) -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+
+        <!-- Druid 连接池 -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid-spring-boot-starter</artifactId>
+            <version>1.2.18</version>
+        </dependency>
+
+        <!-- H2 内存数据库 (h2-test profile: 端到端测试 / 无外部依赖演示) -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+        </dependency>
+
+        <!-- Knife4j API 文档 (doc.html) -->
+        <dependency>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-openapi3-spring-boot-starter</artifactId>
+            <version>4.1.0</version>
+        </dependency>
+
+        <!-- 日志: log4j2 替换默认 logback -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-log4j2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+        </dependency>
+
+        <!-- 端到端测试 (JUnit 5 + Spring Boot Test) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- 可执行 fat jar 打包 (classifier=exec: 主 artifact 保持 thin jar, 对齐 z-schedule-admin) -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals><goal>repackage</goal></goals>
+                        <configuration>
+                            <classifier>exec</classifier>
+                            <mainClass>com.zifang.z.wf.admin.ZWfAdminApplication</mainClass>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

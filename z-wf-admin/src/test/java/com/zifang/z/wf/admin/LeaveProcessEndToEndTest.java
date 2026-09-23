@@ -1,4 +1,4 @@
-package com.zifang.z.wf.starter;
+package com.zifang.z.wf.admin;
 
 import com.zifang.z.wf.core.service.LeaveProcessService;
 import com.zifang.z.wf.core.spi.WfSpiRegistry;
@@ -46,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * @author zifang
  */
-@SpringBootTest(classes = ZWfApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = ZWfAdminApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("h2-test")
 @DisplayName("z-wf 端到端测试 - leaveProcess 流程 + SPI 全链路")
 class LeaveProcessEndToEndTest {

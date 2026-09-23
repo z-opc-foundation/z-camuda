@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue)](LICENSE)
 [![Java](https://img.shields.io/badge/Java-8%2B-orange)](https://openjdk.org)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.7.x-6DB33F)](https://spring.io)
-[![Camunda](https://img.shields.io/badge/Camunda-7.20-FF6F00)](https://camunda.com)
+[![Camunda](https://img.shields.io/badge/Camunda-7.18-FF6F00)](https://camunda.com)
 
 ---
 
@@ -19,7 +19,7 @@
 <dependency>
     <groupId>io.github.yuku123</groupId>
     <artifactId>z-wf-starter</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.4</version>
 </dependency>
 ```
 
@@ -49,9 +49,10 @@ public class WfApplication {
 ```
 
 启动后:
-- REST API: `http://localhost:8080/wf/api/...`
-- Camunda Web Console: `http://localhost:8080/wf/app/cockpit`
+- REST API: `http://localhost:8080/api/...`
 - Knife4j: `http://localhost:8080/doc.html`
+
+> 独立部署形态 (不嵌入业务方) 见 `z-wf-admin` 模块: 自带管理前端, `mvn -pl z-wf-admin spring-boot:run` 或 Docker 启动。
 
 ### 方式二：嵌入 z-config (服务注册) + z-rpc (远程调用)
 
@@ -60,14 +61,14 @@ public class WfApplication {
 <dependency>
     <groupId>io.github.yuku123</groupId>
     <artifactId>z-wf-starter</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.4</version>
 </dependency>
 
 <!-- 配置中心 + 注册中心 -->
 <dependency>
     <groupId>io.github.yuku123</groupId>
     <artifactId>z-config-spring-boot-starter</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 </dependency>
 
 <!-- RPC 框架 -->
@@ -130,13 +131,14 @@ public WfProcessHook rpcWfHook(@Autowired WfProcessService rpcService) {
 
 ## 📦 模块结构
 
-> groupId: `io.github.yuku123` · version: **1.0.0**
+> groupId: `io.github.yuku123` · version: **1.0.4**
 
 | 模块 | 说明 | 何时该引入 |
 |---|---|---|
 | `z-wf-core` | Camunda 封装 + 钩子接口 (WfProcessHook / WfTaskHook / WfNotificationHook) | 客户端调用 / 嵌入使用 |
 | `z-wf-web` | REST API + DTO + Controller (Process / Task / Approval) | Web 层 |
-| `z-wf-starter` | 聚合 starter (core + web + camunda-web + knife4j) | Spring Boot 应用 |
+| `z-wf-starter` | 自动装配 starter (core + web + 可选 z-config/z-rpc 集成) | Spring Boot 应用嵌入 |
+| `z-wf-admin` | 独立可启动应用 (自带管理前端, 不发 Central) | 独立部署 / Docker 镜像 |
 
 ---
 
@@ -147,7 +149,7 @@ public WfProcessHook rpcWfHook(@Autowired WfProcessService rpcService) {
 - ✅ **审批中心** — 待办 / 已办 / 我的发起 / Dashboard 统计
 - ✅ **钩子扩展** — 3 种钩子 (流程 / 任务 / 通知), 3 种调用模式 (本地 / HTTP / RPC)
 - ✅ **REST API** — 9 个 Controller, 完整覆盖流程生命周期
-- ✅ **Camunda 控制台** — 自带 Cockpit / Tasklist / Admin Web 控制台
+- ✅ **自带管理前端** — LogicFlow 流程设计 + 审批页面 (z-wf-admin, 业务方可替换为自己的页面)
 - ✅ **API 文档** — Knife4j (Swagger 3) 集成
 - ✅ **服务注册** — 一行接入 z-config, 自动注册 `z-wf` 实例
 - ✅ **RPC 暴露** — 通过 z-rpc 注解 `@ZRpcService` 把 service 暴露给远程调用方
@@ -158,15 +160,17 @@ public WfProcessHook rpcWfHook(@Autowired WfProcessService rpcService) {
 
 ```
 z-wf/
-├── pom.xml                          # 自给自足 parent (1.0.0)
+├── pom.xml                          # 自给自足 parent (1.0.4)
 ├── z-wf-core/                       # 核心模块 + 钩子接口 ✅
 ├── z-wf-web/                        # REST API + DTO + Controller ✅
-├── z-wf-starter/                    # 聚合 starter (BPMN + Camunda Web + Knife4j) ✅
+├── z-wf-starter/                    # 自动装配 starter (可选 z-config/z-rpc 集成) ✅
 │   └── src/main/resources/
-│       ├── processes/
-│       │   ├── leaveProcess.bpmn          # 请假流程示例
-│       │   └── fiveLookEvaluation.bpmn    # 五看评估流程示例
-│       └── static/                       # Camunda Web Console 前端
+│       └── processes/
+│           ├── leaveProcess.bpmn          # 请假流程示例
+│           └── fiveLookEvaluation.bpmn    # 五看评估流程示例
+├── z-wf-admin/                      # 独立可启动应用 (不发 Maven Central) ✅
+│   └── src/main/resources/
+│       └── static/                       # Z-WF 自带管理前端
 ├── Dockerfile                       # Docker 镜像构建 (Eclipse Temurin 8 JRE)
 ├── docker-compose.yml               # 三服务编排 (z-config + z-wf + z-wf-client)
 ├── start.sh                         # 本地一键启停
@@ -187,7 +191,7 @@ docker compose up -d
 docker compose ps
 
 # 外部访问 z-wf REST API
-curl http://localhost:8080/wf/api/health
+curl http://localhost:8080/api/wf/health
 
 # z-config 注册中心
 curl http://localhost:8848/api/health
@@ -209,7 +213,7 @@ curl http://localhost:8081/wf-client/api/call/start?processKey=leaveProcess
           │              │              │
 ┌────────────────────────────────────────────────────────────┐
 │  z-wf-server (port 8080)                                    │
-│  ─ z-wf-starter (Camunda 引擎 + REST API)                   │
+│  ─ z-wf-admin (Camunda 引擎 + REST API + 管理前端)            │
 │  ─ 启动时 ZNamingService.registerInstance("z-wf", ...)     │
 │  ─ @ZRpcService 暴露 WfProcessService                       │
 └────────────────────────────────────────────────────────────┘
@@ -292,8 +296,9 @@ ZNamingInstance one = znaming.selectOneHealthyInstance("z-wf");
 
 ```bash
 mvn clean install                              # 安装到本地 .m2
-mvn -pl z-wf-starter package -DskipTests       # 单独打 starter 包 (含 BPMN + Camunda Web)
-bash deploy_maven_center.sh publish            # 发布到 Maven Central (本地终端跑)
+mvn -pl z-wf-starter package -DskipTests       # 单独打 starter 包 (纯库)
+mvn -pl z-wf-admin -am package -DskipTests     # 打可执行 fat jar (z-wf-admin-*-exec.jar)
+bash deploy_maven_center.sh publish            # 发布到 Maven Central (本地终端跑, admin 不会发布)
 ```
 
 ---
