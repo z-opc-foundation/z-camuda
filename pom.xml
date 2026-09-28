@@ -58,6 +58,8 @@
 
         <!-- 版本管理 - 全部走 z-boot BOM 统一管理 -->
         <z-boot.version>1.0.17</z-boot.version>
+        <!-- 例外：已发布的 z-boot BOM 1.0.17 里 z-util 仍是旧版，本仓用下面的 DM 直接把 z-util（含传递）压到该属性 -->
+        <z-util.version>1.0.13</z-util.version>
         <camunda.version>7.18.0</camunda.version>
     </properties>
 
@@ -113,7 +115,32 @@
             <dependency>
                 <groupId>io.github.yuku123</groupId>
                 <artifactId>z-util-core</artifactId>
-                <version>1.0.13</version>
+                <version>${z-util.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.yuku123</groupId>
+                <artifactId>z-util-aop</artifactId>
+                <version>${z-util.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.yuku123</groupId>
+                <artifactId>z-util-dsl</artifactId>
+                <version>${z-util.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.yuku123</groupId>
+                <artifactId>z-util-http</artifactId>
+                <version>${z-util.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.yuku123</groupId>
+                <artifactId>z-util-parser-json</artifactId>
+                <version>${z-util.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.yuku123</groupId>
+                <artifactId>z-util-proxy</artifactId>
+                <version>${z-util.version}</version>
             </dependency>
             <!-- log4j2 (SPI Registry 日志) — 与 z-boot BOM 保持一致 2.25.4 -->
             <dependency>

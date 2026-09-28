@@ -27,10 +27,47 @@
     <properties>
         <!-- 与 ../pom.xml <revision> 同步 -->
         <z-wf.version>1.0.5</z-wf.version>
+        <z-util.version>1.0.13</z-util.version>
         <maven.deploy.skip>true</maven.deploy.skip>
         <java.version>8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- admin 认的是 spring-boot parent，拿不到 ../pom.xml 里的 z-util DM；不补齐的话 z-wf-starter(1.0.10)/z-config-starter(1.0.2) 传进来的旧 z-util 会和 1.0.13 混进同一个 classpath -->
+            <dependency>
+                <groupId>io.github.yuku123</groupId>
+                <artifactId>z-util-core</artifactId>
+                <version>${z-util.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.yuku123</groupId>
+                <artifactId>z-util-aop</artifactId>
+                <version>${z-util.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.yuku123</groupId>
+                <artifactId>z-util-dsl</artifactId>
+                <version>${z-util.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.yuku123</groupId>
+                <artifactId>z-util-http</artifactId>
+                <version>${z-util.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.yuku123</groupId>
+                <artifactId>z-util-proxy</artifactId>
+                <version>${z-util.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.yuku123</groupId>
+                <artifactId>z-util-parser-json</artifactId>
+                <version>${z-util.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <!-- z-wf 全栈: core (Camunda 引擎) + web (REST) + starter (自动装配 + z-config/z-rpc 可选集成) -->
