@@ -19,14 +19,14 @@
 
     <groupId>io.github.yuku123</groupId>
     <artifactId>z-wf-admin</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
     <packaging>jar</packaging>
     <name>z-wf :: admin (Standalone App, NOT published to Central)</name>
     <description>Z-WF 独立可启动应用 — Camunda 引擎 + 审批中心 REST + 自带管理前端. 不发 Maven Central.</description>
 
     <properties>
         <!-- 与 ../pom.xml <revision> 同步 -->
-        <z-wf.version>1.0.5</z-wf.version>
+        <z-wf.version>1.0.6</z-wf.version>
         <!-- 与 z-boot-parent 里那一格同名同值：fleet 是不可覆盖的独立发布件，抬号必须显式写 -->
         <z-boot-fleet.version>1.0.0</z-boot-fleet.version>
         <maven.deploy.skip>true</maven.deploy.skip>

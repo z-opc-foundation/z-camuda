@@ -72,7 +72,7 @@
                parser-json/proxy 六件且面值同为 1.0.13 ⇒ 该删（连 root 的 6 条 DM + z-wf-web 的 1 处引用）。
              ⚠ 本仓 `<version>` 用的仍是 CI-friendly 的 ${revision}：flatten 走 `oss`，发布态会把
              ${revision}/${project.version} 都落成字面量（对照上面 repo1 现读的 parent=0 形状）。 -->
-        <revision>1.0.5</revision>
+        <revision>1.0.6</revision>
 
         <!-- ===== 刻意留着、父链完全不供的格 =====
              camunda.version=7.18.0：地板/fleet 两侧都没有 org.camunda.* 的任何一格（现读两份 pom 各 0 命中），
