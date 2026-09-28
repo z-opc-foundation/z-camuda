@@ -27,7 +27,6 @@
     <properties>
         <!-- 与 ../pom.xml <revision> 同步 -->
         <z-wf.version>1.0.5</z-wf.version>
-        <z-util.version>1.0.13</z-util.version>
         <maven.deploy.skip>true</maven.deploy.skip>
         <java.version>8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -35,36 +34,25 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- admin 认的是 spring-boot parent，拿不到 ../pom.xml 里的 z-util DM；不补齐的话 z-wf-starter(1.0.10)/z-config-starter(1.0.2) 传进来的旧 z-util 会和 1.0.13 混进同一个 classpath -->
+            <!-- 兄弟仓 z-* 的版本权威：直接 import z-boot-fleet（z-boot-parent 供的就是这一份，
+                 由 gen_fleet_bom.py 逐件核过 repo1 才落笔）。
+                 ⚠ 本模块**不在** z-boot-parent 那条链上：它的 <parent> 是 spring-boot-starter-parent，
+                 这是 z-wf-admin 建仓就有的既有形状（"独立可启动应用 + maven.deploy.skip + 永不上 Central"，
+                 根 pom 的 <module> 注释与 excludeArtifacts 都写着）。把它改挂到 z-wf/z-boot-parent 上
+                 会顺手把整个可运行应用的第三方口径从 Boot 2.7.12 抬到地板 2.7.18、jackson 2.13.5 抬到 2.18.6、
+                 并让地板那条 spring-boot-starter-logging `*:*` exclusion 生效（logback 从 admin 树里消失）
+                 —— 那是换一次运行时栈，不是一次迁 pom，所以这里**只**把"兄弟仓版本表"接到组织权威上，
+                 第三方一格不动。要真收编 admin 的第三方口径，这是 CEO 的决定，见报告。
+                 import 只会填空：本模块自己/父链已按坐标管着的（spring-boot 那一整族）都顶不动它，
+                 而 starter-parent 压根不管 io.github.yuku123 任何一件 ⇒ 结果就是"内部件走 fleet、第三方走原样"。
+                 原本这里躺着 6 条 ${z-util.version} 的 z-util 直接条目（bfc1c1b 为消除 1.0.2/1.0.10 与
+                 1.0.13 混载补的）：fleet 按坐标供的同为 1.0.13 ⇒ 六条一起删、键一起删。 -->
             <dependency>
                 <groupId>io.github.yuku123</groupId>
-                <artifactId>z-util-core</artifactId>
-                <version>${z-util.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.yuku123</groupId>
-                <artifactId>z-util-aop</artifactId>
-                <version>${z-util.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.yuku123</groupId>
-                <artifactId>z-util-dsl</artifactId>
-                <version>${z-util.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.yuku123</groupId>
-                <artifactId>z-util-http</artifactId>
-                <version>${z-util.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.yuku123</groupId>
-                <artifactId>z-util-proxy</artifactId>
-                <version>${z-util.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.yuku123</groupId>
-                <artifactId>z-util-parser-json</artifactId>
-                <version>${z-util.version}</version>
+                <artifactId>z-boot-fleet</artifactId>
+                <version>1.0.0</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -78,16 +66,17 @@
         </dependency>
 
         <!-- z-config 服务注册 + z-rpc RPC 暴露 (starter 里是 optional 不传递,
-             独立部署形态必须在此显式声明, 否则 WfServerLifecycle 的服务注册失效) -->
+             独立部署形态必须在此显式声明, 否则 WfServerLifecycle 的服务注册失效).
+             两条**字面** <version>1.0.1/1.0.2</version> 已删, 版本由上面 import 的 z-boot-fleet 供：
+             z-config-spring-boot-starter 1.0.1 → 1.0.8、z-rpc-spring-boot-starter 1.0.2 → 1.0.3
+             （与本仓 z-wf-starter 同一格，两处的账见 z-wf-starter/pom.xml 的注释）。 -->
         <dependency>
             <groupId>io.github.yuku123</groupId>
             <artifactId>z-config-spring-boot-starter</artifactId>
-            <version>1.0.1</version>
         </dependency>
         <dependency>
             <groupId>io.github.yuku123</groupId>
             <artifactId>z-rpc-spring-boot-starter</artifactId>
-            <version>1.0.2</version>
         </dependency>
 
         <!-- MySQL (流程引擎持久化, 旧坐标 boot BOM 不管理, 与 z-wf parent 锁同版) -->

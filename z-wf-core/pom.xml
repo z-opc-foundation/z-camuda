@@ -61,12 +61,9 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
+    <!-- 这一段 <build><plugins> 里"只为继承 compiler 配置而存在"的 maven-compiler-plugin 声明删掉了：
+         生命周期绑定照样会跑 compiler，版本与 source/target 8 + UTF-8 + -parameters 由父链
+         z-boot-parent 的 pluginManagement 下发；本模块自己不留无 version 的插件声明
+         （central_pom_scan 的 E 类：静态扫描看不穿 repo1 上的外部 parent，只会报"无 version 且父链无兜底"，
+         同 z-graph 迁移时的处理）。实测迁移后本模块产物仍是 class-file major 52。 -->
 </project>

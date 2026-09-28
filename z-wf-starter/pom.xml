@@ -46,11 +46,19 @@
         </dependency>
 
         <!-- ========== 可选集成 (业务方 classpath 不含就不加载) ========== -->
+        <!-- ⚠ 这两条原本写的是**字面** <version>1.0.1</version> / <version>1.0.2</version>，已删除。
+             字面 <version> 优先级高于任何 dependencyManagement ⇒ fleet 那两格顶不住它，本仓一直停在
+             自家 2024 年的旧构建上（central_chain_probe 的 literals-all 在本仓量的就是这 4 处，另两处在同一坐标的 admin 侧）。
+             删掉之后由 z-boot-fleet 供：z-config-spring-boot-starter 1.0.1 → **1.0.8**、
+             z-rpc-spring-boot-starter 1.0.2 → **1.0.3**（连带 z-config-client/common、z-rpc-api/core/remoting…
+             整族一起抬）。这是**刻意换实现**的行为变化，不是顺手清理：本仓代码真的吃这两族的 API
+             （WfServerLifecycle 用 com.zifang.z.config.client.naming.ZNamingService +
+             com.zifang.z.rpc.starter.properties.ZRpcProperties，WfProcessRpcServiceImpl 用 @ZRpcService），
+             所以抬号之后必须实测"编译过 + 测试红绿与迁移前一致"才算数。 -->
         <!-- z-config 服务注册中心 (让 z-wf 自动注册到 z-config, 让其他服务发现 z-wf 实例) -->
         <dependency>
             <groupId>io.github.yuku123</groupId>
             <artifactId>z-config-spring-boot-starter</artifactId>
-            <version>1.0.1</version>
             <optional>true</optional>
         </dependency>
 
@@ -58,7 +66,6 @@
         <dependency>
             <groupId>io.github.yuku123</groupId>
             <artifactId>z-rpc-spring-boot-starter</artifactId>
-            <version>1.0.2</version>
             <optional>true</optional>
         </dependency>
 
@@ -69,12 +76,6 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
+    <!-- maven-compiler-plugin 这条"只为继承配置"的声明删掉，口径由父链 pluginManagement 下发
+         （同 z-wf-core / z-wf-web 的注释；留一条无 version 的插件声明就是 central_pom_scan 的 E 类缺陷）。 -->
 </project>

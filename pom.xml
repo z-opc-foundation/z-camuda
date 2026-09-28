@@ -4,7 +4,21 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- 自包含 parent, 发布到 Maven Central -->
+    <!-- 消费入口统一走 z-boot-parent（1.0.19 起全组织口径）：一行 parent 白拿
+         ① 第三方地板 z-boot-dependencies:1.0.19（spring-boot / jackson-bom / netty-bom / log4j2 …）
+         ② 兄弟仓版本权威 z-boot-fleet:1.0.0（import 进来，覆盖每个兄弟仓的对外坐标，含 z-config/z-rpc/z-util）
+         ③ Java 8 构建口径（pluginManagement：compiler source/target 8 + -parameters、surefire 2.22.2 …）
+         迁移前这里是**自包含根 pom**（没有 <parent>，版本表 5 格自己摊），对外发的是 flatten `oss`
+         之后的自包含 raw pom（现读 repo1：z-wf / z-wf-core 的中央 pom `<parent>` 计数都是 0）
+         ⇒ 形状由本仓既有的常开 flatten 保住，不随这次迁移改变。
+         relativePath 必须留空：parent 不在磁盘上，在 repo1。 -->
+    <parent>
+        <groupId>io.github.yuku123</groupId>
+        <artifactId>z-boot-parent</artifactId>
+        <version>1.0.19</version>
+        <relativePath/>
+    </parent>
+
     <groupId>io.github.yuku123</groupId>
     <artifactId>z-wf</artifactId>
     <version>${revision}</version>
@@ -48,33 +62,34 @@
     </modules>
 
     <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-        <!-- CI-friendly versions 根 -->
+        <!-- 版本口径由 parent 下发。删掉的键（parent_preflight 第 2 节"同值可删"）连带删掉它们在 3 个 pom 里的
+             每一处引用，引用没删干净会在子模块 pom 上炸成 "'dependencies.dependency.version' … must be a valid version"：
+             · maven.compiler.source=8 / maven.compiler.target=8 / project.build.sourceEncoding=UTF-8
+               （这两行编码原本还写重了一遍）：z-boot-parent 下发同一口径，class-file 仍是 major 52。
+             · z-boot.version=1.0.17：那条 z-boot-dependencies 的 import 一起删——父链供的是 1.0.19，
+               留着自己的那一格就是"每个仓各起一张版本表"这笔账本身。
+             · z-util.version=1.0.13：键名父链没有，但 fleet **按坐标**管着 z-util-core/aop/dsl/http/
+               parser-json/proxy 六件且面值同为 1.0.13 ⇒ 该删（连 root 的 6 条 DM + z-wf-web 的 1 处引用）。
+             ⚠ 本仓 `<version>` 用的仍是 CI-friendly 的 ${revision}：flatten 走 `oss`，发布态会把
+             ${revision}/${project.version} 都落成字面量（对照上面 repo1 现读的 parent=0 形状）。 -->
         <revision>1.0.5</revision>
 
-        <!-- 版本管理 - 全部走 z-boot BOM 统一管理 -->
-        <z-boot.version>1.0.17</z-boot.version>
-        <!-- 例外：已发布的 z-boot BOM 1.0.17 里 z-util 仍是旧版，本仓用下面的 DM 直接把 z-util（含传递）压到该属性 -->
-        <z-util.version>1.0.13</z-util.version>
+        <!-- ===== 刻意留着、父链完全不供的格 =====
+             camunda.version=7.18.0：地板/fleet 两侧都没有 org.camunda.* 的任何一格（现读两份 pom 各 0 命中），
+             camunda-bom 那条 import 必须留在这里，删键当场悬空（preflight 第 5 节点名了它）。
+             注意坑 5：`import` 进来的 BOM 顶不过从 parent 继承来的**直接** DM 条目——camunda 那一族父链
+             一条都不管，所以这一格今天不会和父链打架；将来地板若开始管 camunda，得改写成逐坐标的直接条目。 -->
         <camunda.version>7.18.0</camunda.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
-            <!-- z-boot BOM (第三方版本权威, 已含 spring-boot-dependencies / jackson / druid / mybatis / swagger 等) -->
-            <dependency>
-                <groupId>io.github.yuku123</groupId>
-                <artifactId>z-boot-dependencies</artifactId>
-                <version>${z-boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
+            <!-- z-boot BOM 的 import 删掉：父链（z-boot-parent 的 parent 就是 z-boot-dependencies）已经
+                 把地板供进来，本仓再 import 一次只是 dm 打架的来源。代价是第三方口径从地板 1.0.17 抬到
+                 1.0.19（spring-boot 2.7.12→2.7.18、spring 5.3.27→5.3.39、tomcat 9.0.75→9.0.83、
+                 netty 4.1.92.Final→4.1.138.Final…全部是地板向上的口径），逐行账见 commit body。 -->
 
-            <!-- Camunda BOM -->
+            <!-- Camunda BOM（父链不供，见上面 camunda.version 的注释） -->
             <dependency>
                 <groupId>org.camunda.bpm</groupId>
                 <artifactId>camunda-bom</artifactId>
@@ -83,78 +98,62 @@
                 <scope>import</scope>
             </dependency>
 
-            <!-- 子模块 -->
+            <!-- ===== 本仓自家 5 个 reactor 坐标逐条钉 ${project.version}（README 第 4 步）=====
+                 原本只有 core/web/starter 三条、且写的是 ${revision}；现在补齐 5 条并统一成
+                 ${project.version}（本仓 flatten 是 `oss`，会把 `${project.version}` 落成字面量，
+                 所以不会踩 z-boot-parent 那条"${project.version 在 resolveCiFriendliesOnly 下不能用}"的雷）。
+                 这一格不是装饰：继承来的 DM 会改写**传递依赖**的版本，而 fleet 里压根没有 z-wf 那一格
+                 （现读 z-boot-fleet/pom.xml：z-wf 命中 0 条），不钉就得靠各模块写字面 1.0.5——
+                 写字面值的下场就是仓内构建哪天忘了抬号，会把旧发布件的字节码混进新版本。 -->
+            <dependency>
+                <groupId>io.github.yuku123</groupId>
+                <artifactId>z-wf</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+            </dependency>
             <dependency>
                 <groupId>io.github.yuku123</groupId>
                 <artifactId>z-wf-core</artifactId>
-                <version>${revision}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.yuku123</groupId>
                 <artifactId>z-wf-web</artifactId>
-                <version>${revision}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.yuku123</groupId>
                 <artifactId>z-wf-starter</artifactId>
-                <version>${revision}</version>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.yuku123</groupId>
+                <artifactId>z-wf-admin</artifactId>
+                <version>${project.version}</version>
             </dependency>
 
-            <!-- z-wf 内部子模块需要的旧坐标依赖, z-boot-dependencies BOM 未管理 -->
-            <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-                <version>8.0.33</version>
-            </dependency>
+            <!-- ===== 以下三条原本在表里，现在的落点 =====
+                 · mysql-connector-java 8.0.33 —— 删掉：父链供的就是这个面值。地板直接条目只管
+                   com.mysql:mysql-connector-j（新坐标），旧坐标由地板 import 的
+                   spring-boot-dependencies:2.7.18 管（现读那份 pom：mysql.version=8.0.33），与本仓逐字节相同
+                   ⇒ 同值可删。admin 那条字面 ${8.0.33} 依赖不受影响（字面版本优先级高于任何 DM）。
+                 · z-util-core/aop/dsl/http/parser-json/proxy 六条 —— 删掉：fleet 按坐标逐条供 1.0.13，同值。
+                 · log4j-api / log4j-core 两条 2.25.4 —— 删掉：地板把 api/core/jul/slf4j-impl 四条**直接**
+                   钉在 2.25.4（z-boot-dependencies/pom.xml:517-534），与本仓面值相同 ⇒ 同值可删。 -->
+
+            <!-- ===== 必须留下的两格：父链完全不供（按坐标判，不是按键名判）=====
+                 · io.swagger.core.v3:swagger-annotations —— 地板只字面管 io.swagger:swagger-annotations
+                   （1.6.6，groupId 不同的另一族），spring-boot-dependencies 也不管 swagger ⇒ 删键当场悬空，
+                   z-wf-web 那条 provided 依赖就没有版本了。面值维持本仓的 2.2.8。
+                 · log4j-slf4j2-impl 2.26.1 —— 地板只有 log4j-slf4j-**1.x** 那一支（log4j-slf4j-impl 2.25.4），
+                   对 slf4j2 的 impl 一条都不管；这一件在树里是 z-util-core:1.0.13 的传递依赖（它自己
+                   DM 里也是 2.26.1）。删掉本条就等于"由 z-util 的 pom 替本仓决定日志绑定版本"，
+                   那是静默漂移，不是零漂移 ⇒ 留着把 2.26.1 写成本仓口径。 -->
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-annotations</artifactId>
                 <version>2.2.8</version>
             </dependency>
-            <!-- z-util-core (Result / PageResult / StatusCode 等通用类型) -->
-            <dependency>
-                <groupId>io.github.yuku123</groupId>
-                <artifactId>z-util-core</artifactId>
-                <version>${z-util.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.yuku123</groupId>
-                <artifactId>z-util-aop</artifactId>
-                <version>${z-util.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.yuku123</groupId>
-                <artifactId>z-util-dsl</artifactId>
-                <version>${z-util.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.yuku123</groupId>
-                <artifactId>z-util-http</artifactId>
-                <version>${z-util.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.yuku123</groupId>
-                <artifactId>z-util-parser-json</artifactId>
-                <version>${z-util.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.yuku123</groupId>
-                <artifactId>z-util-proxy</artifactId>
-                <version>${z-util.version}</version>
-            </dependency>
-            <!-- log4j2 (SPI Registry 日志) — 与 z-boot BOM 保持一致 2.25.4 -->
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-api</artifactId>
-                <version>2.25.4</version>
-            </dependency>
-            <!-- log4j-core 跟随 log4j-api 同版本 -->
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-core</artifactId>
-                <version>2.25.4</version>
-            </dependency>
-            <!-- log4j-slf4j2-impl 跟随 z-boot BOM 2.26.1（与 slf4j-api 2.x 兼容） -->
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-slf4j2-impl</artifactId>
@@ -165,24 +164,33 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-                <configuration>
-                    <source>${maven.compiler.source}</source>
-                    <target>${maven.compiler.target}</target>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
+            <!-- maven-compiler-plugin 的那条声明（3.8.1 + <source>/<target> 指 ${maven.compiler.*}）删掉了：
+                 键已随迁移删除，留着就是 README 坑 6 那种"借自旧 parent 的属性当场悬空"。
+                 口径改由 z-boot-parent 的 pluginManagement 下发（3.11.0 + source/target 8 + UTF-8 + -parameters），
+                 实测迁移后 target/classes 的 class 字节 6-7 仍是 0 52（Java 8，见 commit body 的 javap 读数）。
+                 -parameters 是父链统一口径（Spring 构造器注入/@ConfigurationProperties 靠参数名），
+                 本仓原先没有；它只往 class 里加 MethodParameters 属性，不改语义。 -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
                 <version>1.7.3</version>
+                <!-- 发布形状（README 第 7 步）：z-boot-parent 那条 flatten 声明是
+                     <inherited>false</inherited>（z-boot-parent/pom.xml:255-266，它自己用
+                     resolveCiFriendliesOnly），**不下发**给消费仓 ⇒ 加了 <parent> 之后必须由本仓自己
+                     把 pom 扁平掉，否则发出去的是"带着 z-boot-parent:1.0.19 的 raw pom"，而本仓被删掉的那些
+                     版本格已经不在自己 pom 里了。判据按**本仓中央上是什么形状**：现读 repo1
+                     （ranged GET 206）z-wf / z-wf-core / z-wf-starter 的 1.0.5 pom `<parent>` 计数都是 0、
+                     com.zifang 计数 0、悬空 ${} 0 个 ⇒ 本仓一直是自包含形状，这条 flatten `oss` +
+                     updatePomFile 就是保住它的东西 ⇒ 保持**常开**，不挂 `central` profile
+                     （挂 profile 时不带 -P central 的 `mvn install` 会把带 parent 的废 pom 装进仓里）。
+                     本仓原本就有这一段（迁移前后同一格），所以形状不随这次迁移改变；
+                     版本仍是本仓既有的 1.7.3（不是 z-graph/z-kb 的 1.5.0——那两仓是为门禁机 Maven 3.6.0 钉的，
+                     本仓一直用 1.7.3 发的 1.0.5，换它反而是无谓的漂移；repo1-only 那遍复跑证明 1.7.3 取得到）。 -->
                 <configuration>
                     <updatePomFile>true</updatePomFile>
                     <!-- oss 模式: 保留 Central 要求的元数据 (url/licenses/developers/scm)
-                         + 解析 CI-friendly 属性 (${revision}/${sha1}/${changelist}/${tag}) -->
+                         + 解析 CI-friendly 属性 (${revision}/${sha1}/${changelist}/${tag})
+                         并把 ${project.version} 落成字面量 -->
                     <flattenMode>oss</flattenMode>
                 </configuration>
                 <executions>
