@@ -113,7 +113,7 @@
             <dependency>
                 <groupId>io.github.yuku123</groupId>
                 <artifactId>z-util-core</artifactId>
-                <version>1.0.10</version>
+                <version>1.0.13</version>
             </dependency>
             <!-- log4j2 (SPI Registry 日志) — 与 z-boot BOM 保持一致 2.25.4 -->
             <dependency>
