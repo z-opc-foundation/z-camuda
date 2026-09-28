@@ -2,9 +2,9 @@ package com.zifang.z.wf.web.api;
 
 
 import com.zifang.util.core.meta.Result;
+import com.zifang.util.core.meta.page.PageResult;
 import com.zifang.z.wf.web.dto.ApprovalRequestDTO;
 import com.zifang.z.wf.web.dto.DashboardStatsVO;
-import com.zifang.z.wf.web.dto.PageResult;
 import com.zifang.z.wf.web.dto.ProcessDetailVO;
 import com.zifang.z.wf.web.dto.ProcessInstanceVO;
 import com.zifang.z.wf.web.dto.StartProcessRequestDTO;
@@ -177,7 +177,7 @@ public class ApprovalCenterController {
             return vo;
         }).collect(Collectors.toList());
 
-        PageResult<TaskSummaryVO> pageResult = PageResult.of(result, total, pageNum, pageSize);
+        PageResult<TaskSummaryVO> pageResult = new PageResult<>(result, total, pageNum, pageSize);
         return Result.success(pageResult);
     }
 
@@ -242,7 +242,7 @@ public class ApprovalCenterController {
             return vo;
         }).collect(Collectors.toList());
 
-        PageResult<TaskSummaryVO> pageResult = PageResult.of(result, total, pageNum, pageSize);
+        PageResult<TaskSummaryVO> pageResult = new PageResult<>(result, total, pageNum, pageSize);
         return Result.success(pageResult);
     }
 
@@ -490,7 +490,7 @@ public class ApprovalCenterController {
             }
         }
 
-        PageResult<ProcessInstanceVO> pageResult = PageResult.of(result, total, pageNum, pageSize);
+        PageResult<ProcessInstanceVO> pageResult = new PageResult<>(result, total, pageNum, pageSize);
         return Result.success(pageResult);
     }
 
