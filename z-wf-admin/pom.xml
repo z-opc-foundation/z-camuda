@@ -27,8 +27,10 @@
     <properties>
         <!-- 与 ../pom.xml <revision> 同步 -->
         <z-wf.version>1.0.6</z-wf.version>
-        <!-- 与 z-boot-parent 里那一格同名同值：fleet 是不可覆盖的独立发布件，抬号必须显式写 -->
-        <z-boot-fleet.version>1.0.0</z-boot-fleet.version>
+        <!-- 与 z-boot-parent 里那一格同名同值：fleet 是不可覆盖的独立发布件，抬号必须显式写。
+             2026-09-29 消费者轮抬到 1.0.1（= z-boot-parent:1.0.21 import 的那一份）：
+             停在 1.0.0 会让本模块 import 的兄弟仓面值落后一整批。 -->
+        <z-boot-fleet.version>1.0.1</z-boot-fleet.version>
         <maven.deploy.skip>true</maven.deploy.skip>
         <java.version>8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
