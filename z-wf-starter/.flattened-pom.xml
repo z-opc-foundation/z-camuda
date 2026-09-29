@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.yuku123</groupId>
   <artifactId>z-wf-starter</artifactId>
-  <version>1.0.5</version>
+  <version>1.0.6</version>
   <name>z-wf-starter</name>
   <description>工作流引擎 Spring Boot Starter — 自动装配 Camunda 引擎 + 审批中心 REST + 可选 z-config/z-rpc 集成 (可运行应用见 z-wf-admin)</description>
   <url>https://github.com/yuku123/z-opc-foundation/tree/main/z-wf/z-wf-starter</url>
@@ -30,13 +30,13 @@
     <dependency>
       <groupId>io.github.yuku123</groupId>
       <artifactId>z-wf-core</artifactId>
-      <version>1.0.5</version>
+      <version>1.0.6</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>io.github.yuku123</groupId>
       <artifactId>z-wf-web</artifactId>
-      <version>1.0.5</version>
+      <version>1.0.6</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

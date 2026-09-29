@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.yuku123</groupId>
   <artifactId>z-wf-core</artifactId>
-  <version>1.0.5</version>
+  <version>1.0.6</version>
   <name>z-wf-core</name>
   <description>工作流引擎核心模块 — Camunda 封装 + 钩子接口</description>
   <url>https://github.com/yuku123/z-opc-foundation/tree/main/z-wf/z-wf-core</url>

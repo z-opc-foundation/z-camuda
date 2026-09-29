@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.yuku123</groupId>
   <artifactId>z-wf-web</artifactId>
-  <version>1.0.5</version>
+  <version>1.0.6</version>
   <name>z-wf-web</name>
   <description>工作流引擎 Web 模块 — REST API + 审批中心</description>
   <url>https://github.com/yuku123/z-opc-foundation/tree/main/z-wf/z-wf-web</url>
@@ -30,7 +30,7 @@
     <dependency>
       <groupId>io.github.yuku123</groupId>
       <artifactId>z-wf-core</artifactId>
-      <version>1.0.5</version>
+      <version>1.0.6</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
