@@ -1,330 +1,283 @@
 # z-wf
 
-> **基于 Camunda 7 的工作流引擎**, 支持流程定义 + 任务管理 + 审批中心。
-> 通过 **z-config** 注册到服务注册中心, 通过 **z-rpc** 对外暴露流程服务接口。
-> 业务方一行 Spring Boot Starter 集成, 钩子接口 (WfProcessHook / WfTaskHook / WfNotificationHook) 支持本地/HTTP/RPC 多模式扩展。
+> 基于 **Camunda 7** 的工作流引擎 —— 流程定义 + 任务管理 + 审批中心，通过 SPI 扩展点与钩子接口把审批链路的控制权交回业务方。
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue)](LICENSE)
-[![Java](https://img.shields.io/badge/Java-8%2B-orange)](https://openjdk.org)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.7.x-6DB33F)](https://spring.io)
-[![Camunda](https://img.shields.io/badge/Camunda-7.18-FF6F00)](https://camunda.com)
-
----
-
-## 🚀 5 分钟接入
-
-### 方式一：作为 Spring Boot 应用 (推荐)
-
-```xml
-<dependency>
-    <groupId>io.github.yuku123</groupId>
-    <artifactId>z-wf-starter</artifactId>
-    <version>1.0.5</version>
-</dependency>
-```
-
-`application.yml`:
-```yaml
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/camunda?useSSL=false&serverTimezone=Asia/Shanghai
-    username: root
-    password: root
-    driver-class-name: com.mysql.cj.jdbc.Driver
-camunda:
-  bpm:
-    database:
-      schema-update: true   # 首次启动自动建表
-    auto-deployment-enabled: true
-```
-
-启动类:
-```java
-@SpringBootApplication
-public class WfApplication {
-    public static void main(String[] args) {
-        SpringApplication.run(WfApplication.class, args);
-    }
-}
-```
-
-启动后:
-- REST API: `http://localhost:8080/api/...`
-- Knife4j: `http://localhost:8080/doc.html`
-
-> 独立部署形态 (不嵌入业务方) 见 `z-wf-admin` 模块: 自带管理前端, `mvn -pl z-wf-admin spring-boot:run` 或 Docker 启动。
-
-### 方式二：嵌入 z-config (服务注册) + z-rpc (远程调用)
-
-```xml
-<!-- 工作流引擎 -->
-<dependency>
-    <groupId>io.github.yuku123</groupId>
-    <artifactId>z-wf-starter</artifactId>
-    <version>1.0.5</version>
-</dependency>
-
-<!-- 配置中心 + 注册中心 -->
-<dependency>
-    <groupId>io.github.yuku123</groupId>
-    <artifactId>z-config-spring-boot-starter</artifactId>
-    <version>1.0.1</version>
-</dependency>
-
-<!-- RPC 框架 -->
-<dependency>
-    <groupId>io.github.yuku123</groupId>
-    <artifactId>z-rpc-spring-boot-starter</artifactId>
-    <version>1.0.2</version>
-</dependency>
-```
-
-```yaml
-z:
-  config:
-    enabled: true
-    server-addr: localhost:8848       # z-config server 地址
-    namespace: production
-  rpc:
-    enabled: true
-    protocol: zrpc
-    registry:
-      type: z-config                  # 用 z-config 当注册中心
-      address: localhost:8848
-    service: z-wf                     # 注册到 z-config 的服务名
-```
-
-启动后:
-- z-wf 自动以服务名 `z-wf` 注册到 z-config (ip + port)
-- 暴露 RPC 接口 `WfProcessService` / `WfTaskService` / `WfNotificationService`
-- 其他服务通过 `@ZRpcReference` 引用即可远程调用
-
-### 方式三：通过钩子接口扩展 (本地 / HTTP / RPC)
-
-```java
-// 1. 本地模式: 直接调用 service
-@Bean
-public WfProcessHook localWfHook() {
-    return new WfProcessHook() {
-        @Override
-        public boolean onBeforeStart(String processKey, Map<String, Object> vars) {
-            log.info("流程 {} 启动前校验", processKey);
-            return true;
-        }
-    };
-}
-
-// 2. HTTP 模式: 调 REST API
-@Bean
-public WfProcessHook httpWfHook(@Value("${z-wf.url}") String baseUrl) {
-    return new HttpWfProcessHook(baseUrl);
-}
-
-// 3. RPC 模式: 通过 z-rpc 调用
-@Bean
-public WfProcessHook rpcWfHook(@Autowired WfProcessService rpcService) {
-    return new RpcWfProcessHook(rpcService);
-}
-```
+一人公司基座里的"审批/流程"中枢：把 Camunda 的 BPMN 引擎封装成一组 REST API 和一个 Spring Boot
+Starter，业务方引一条依赖即可嵌入自己的进程；独立部署时由 `z-wf-admin` 提供自带管理前端。
+真正的差异化在**扩展模型**：3 个生命周期钩子接口 + 22 个从 ace 平台蒸馏下来的 SPI 扩展接口
+（表单 / 审批 / 流程 / Apex 四大类），业务方实现接口并打上 `@WfSpi`，`WfSpiRegistry` 启动时扫描、
+按 `order` 排序，在流程关键节点串行回调。服务治理侧可一行接入 `z-config` 注册中心、经 `z-rpc` 暴露流程服务。
 
 ---
 
-## 📦 模块结构
+## 📋 基本信息
 
-> groupId: `io.github.yuku123` · version: **1.0.5**
+| 字段 | 值 |
+|------|-----|
+| **仓库** | `z-wf`（Workflow Engine） |
+| **Maven 坐标** | `io.github.yuku123:z-wf:${revision}`（聚合 POM，`packaging=pom`） |
+| **当前版本** | `1.0.6`（根 POM `<revision>`，CI-friendly versions + `flatten-maven-plugin` `oss` 模式） |
+| **父项目** | `io.github.yuku123:z-boot-parent:1.0.21`（`<relativePath/>` 留空，parent 在 repo1 不在磁盘；1.0.19 起全组织统一走该 parent，本仓不再是自包含根 POM） |
+| **Maven Central** | 已发布：`z-wf` / `z-wf-core` / `z-wf-web` / `z-wf-starter` 的 `1.0.6` 均可从 repo1 拉取；`z-wf-admin:1.0.6` 返回 404（设计上不发 Central） |
+| **默认端口** | `8080`（`SERVER_PORT`），`server.servlet.context-path` 默认 `/`（`SERVER_CONTEXT_PATH`）；`z-rpc` 端口默认 `20880` |
+| **运行口径** | Java 8 · Spring Boot 2.7.18（库模块经父链地板；`z-wf-admin` 自带 `spring-boot-starter-parent` 钉 2.7.12） · Camunda BPM 7.18.0 |
+| **最近更新** | 2026-09-30 |
 
-| 模块 | 说明 | 何时该引入 |
-|---|---|---|
-| `z-wf-core` | Camunda 封装 + 钩子接口 (WfProcessHook / WfTaskHook / WfNotificationHook) | 客户端调用 / 嵌入使用 |
-| `z-wf-web` | REST API + DTO + Controller (Process / Task / Approval) | Web 层 |
-| `z-wf-starter` | 自动装配 starter (core + web + 可选 z-config/z-rpc 集成) | Spring Boot 应用嵌入 |
-| `z-wf-admin` | 独立可启动应用 (自带管理前端, 不发 Central) | 独立部署 / Docker 镜像 |
+> 版本口径由父链下发：第三方地板来自 `z-boot-dependencies`，兄弟仓（`z-config` / `z-rpc` / `z-util`）面值来自
+> `z-boot-fleet` 权威表。`camunda.version=7.18.0` 是本仓**刻意保留**的自有版本键（父链不供 `org.camunda.*`）。
 
 ---
 
-## ✨ 核心能力
+## 🎯 能力清单
 
-- ✅ **流程定义** — BPMN 2.0 (Camunda Modeler 可视化编辑)
-- ✅ **任务管理** — 启动流程 / 完成任务 / 委派 / 跳转 / 回退
-- ✅ **审批中心** — 待办 / 已办 / 我的发起 / Dashboard 统计
-- ✅ **钩子扩展** — 3 种钩子 (流程 / 任务 / 通知), 3 种调用模式 (本地 / HTTP / RPC)
-- ✅ **REST API** — 9 个 Controller, 完整覆盖流程生命周期
-- ✅ **自带管理前端** — LogicFlow 流程设计 + 审批页面 (z-wf-admin, 业务方可替换为自己的页面)
-- ✅ **API 文档** — Knife4j (Swagger 3) 集成
-- ✅ **服务注册** — 一行接入 z-config, 自动注册 `z-wf` 实例
-- ✅ **RPC 暴露** — 通过 z-rpc 注解 `@ZRpcService` 把 service 暴露给远程调用方
+能力全部对应到代码里的 Controller / Service / SPI 接口，不做无实现的承诺：
+
+| 能力 | 入口 | 说明 |
+|------|------|------|
+| 审批中心 | `ApprovalCenterController` (`/api/approval-center`) | Dashboard 统计、待办 / 已办 / 我的发起 / 任务详情 / 流程详情、发起与删除流程、流程定义检索与版本 / 挂起 / 激活 |
+| 流程操作 | `ProcessOperationController` (`/api/wf/process`) | 挂起 / 激活实例、加签评论、审批轨迹（trail）、流程总览 |
+| 任务操作 | `TaskOperationController` (`/api/wf/task`) | 转办（transfer）、委派（delegate）、认领（claim）、撤回（withdraw）、跳转（jump）、强制完成 |
+| 流程分组 | `GroupController` (`/api/wf/group`) | 基于 Camunda Category 的流程分组增删查 |
+| 请假流程 | `LeaveProcessController` (`/api/leave`) | 示例流程：发起 / 待办 / 审批任务 / 完成 |
+| 健康检查 | `WfBaseHealthController` (`/api/wf`) | `GET /api/wf/health` |
+| 生命周期钩子 | `WfProcessHook` / `WfTaskHook` / `WfNotificationHook` | 流程启动前后 / 完成、任务创建变更完成、通知（分配 / 结果 / 超时）回调接口 |
+| SPI 扩展点 | `com.zifang.z.wf.core.spi.*`（22 个接口）+ `WfSpiRegistry` | 表单、审批、流程、Apex 四大类扩展点，`@WfSpi` 标注、按 `order` 串行执行 |
+| RPC 暴露 | `WfProcessRpcServiceImpl`（`@ZRpcService`） | 经 z-rpc 对外暴露 `WfProcessRpcService`：发起 / 待办 / 完成 |
+| 服务注册 | `WfServerLifecycle` | 上下文就绪后把 `z-wf` 实例（ip + rpc 端口）注册进 z-config |
+
+> 说明：钩子接口是**本地 Bean** 扩展模型（业务方 `@Bean` 提供实现）；旧 README 里"HTTP / RPC 适配器类
+> `HttpWfProcessHook` / `RpcWfProcessHook`"在当前代码中并不存在，故不再列为可用能力。跨进程调用走下面的 z-rpc。
 
 ---
 
 ## 🏗️ 项目结构
 
+4 个 Maven 模块（根 POM `<modules>` 实测清单），不再有历史里的 `z-wf-client`：
+
 ```
 z-wf/
-├── pom.xml                          # 自给自足 parent (1.0.5)
-├── z-wf-core/                       # 核心模块 + 钩子接口 ✅
-├── z-wf-web/                        # REST API + DTO + Controller ✅
-├── z-wf-starter/                    # 自动装配 starter (可选 z-config/z-rpc 集成) ✅
+├── pom.xml                # 根聚合 POM：继承 z-boot-parent:1.0.21，<revision> 统一版本，camunda-bom 在本仓 import
+├── z-wf-core/             # Camunda 封装 + 3 个钩子接口 + 22 个 SPI 扩展接口 + @WfSpi + WfSpiRegistry + LeaveProcessService
+├── z-wf-web/              # REST API：6 个 Controller + DTO/VO（依赖 core、z-util-core、swagger-annotations provided）
+├── z-wf-starter/          # 自动装配 + z-config/z-rpc 可选集成 + RPC 暴露 + audit SPI 夹具 + 示例流程
 │   └── src/main/resources/
+│       ├── META-INF/spring.factories          # 指向 WfStarterAutoConfiguration
 │       └── processes/
-│           ├── leaveProcess.bpmn          # 请假流程示例
-│           └── fiveLookEvaluation.bpmn    # 五看评估流程示例
-├── z-wf-admin/                      # 独立可启动应用 (不发 Maven Central) ✅
+│           ├── leaveProcess.bpmn              # 请假流程示例
+│           └── fiveLookEvaluation.bpmn        # 五看评估流程示例（多步评分 + 排他网关）
+├── z-wf-admin/            # 独立可启动应用（不发 Central）+ 自带管理前端 + 端到端测试
 │   └── src/main/resources/
-│       └── static/                       # Z-WF 自带管理前端
-├── Dockerfile                       # Docker 镜像构建 (Eclipse Temurin 8 JRE)
-├── docker-compose.yml               # 三服务编排 (mysql + z-config + z-wf)
-├── start.sh                         # 本地一键启停
-├── install-settings.sh              # 写入 Maven Central 凭证到 ~/.m2
-├── deploy_maven_center.sh           # 发布到 Maven Central
-└── README.md
+│       ├── application.properties             # 端口 / 数据源 / camunda / z-config / z-rpc 口径
+│       ├── application-h2-test.properties     # h2-test profile：H2 内存库 + 关外部依赖
+│       └── static/                            # 打包进来的管理前端（LogicFlow 设计器 + 审批页）
+├── Dockerfile             # 多阶段：maven:3.9.9-eclipse-temurin-8 → eclipse-temurin:8-jre，EXPOSE 8080，healthcheck /api/wf/health
+├── docker-compose.yml     # 三服务编排：mysql + z-config + z-wf
+├── LICENSE                # MIT
+└── _doc/                  # 文档收口，见文末「文档目录」
 ```
+
+`z-wf-admin` 留在 reactor 里是为了享受统一构建，但其 POM 设了 `maven.deploy.skip=true`，且根 POM 的
+`central-publishing-maven-plugin` 把它放进 `excludeArtifacts`——产物只作 Docker 镜像来源或本地
+`java -jar` 演示，**永远不会上 Maven Central**。`z-wf-starter` 里的 `z-config` / `z-rpc` 是 `optional`，
+独立部署形态（admin）会显式补上这两条依赖，否则 `WfServerLifecycle` 的服务注册不生效。
 
 ---
 
-## 🐳 Docker 部署 (三服务编排)
+## 🔧 技术栈
+
+均来自各 POM 实测：
+
+| 层级 | 技术 |
+|------|------|
+| 语言 / 运行时 | Java 8（父链 `pluginManagement` 下发 source/target 8 + `-parameters`，class-file major 52） |
+| 框架 | Spring Boot 2.7.18（库模块由 `z-boot-dependencies` 地板供）；`z-wf-admin` 自带 parent `spring-boot-starter-parent:2.7.12` |
+| 工作流引擎 | Camunda BPM `7.18.0`（`camunda-bpm-spring-boot-starter` + `camunda-bom` import，版本键留本仓） |
+| 通用类型 | `z-util-core`（`Result` / `PageResult` / `StatusCode`），版本随 `z-boot-fleet` 权威表 |
+| 数据库 | 生产 MySQL 8（`mysql-connector-java 8.0.33` 旧坐标）+ Druid `1.2.18`（admin）；H2（`h2-test` profile） |
+| 日志 | log4j2（`log4j-api`/`core` 走地板 2.25.4；`log4j-slf4j2-impl 2.26.1` 本仓留格） |
+| 接口文档 | Knife4j / OpenAPI3（`knife4j-openapi3-spring-boot-starter 4.1.0` 在 admin；`swagger-annotations 2.2.8` 在 web，provided） |
+| 服务治理 | `z-config`（注册 + 配置）· `z-rpc`（Netty RPC），starter 里 optional |
+| 前端 | `z-wf-admin` 内置静态管理前端（LogicFlow 流程设计 + 审批页） |
+| 构建 | Maven；`flatten-maven-plugin 1.7.3`（`oss` 模式 + `updatePomFile`，发布态把 `${revision}` / `${project.version}` 落成字面量，产出自包含 pom） |
+
+---
+
+## 🚀 快速开始
+
+### 编译
 
 ```bash
-cd z-wf
-docker compose up -d
-
-# 验证三服务都启动
-docker compose ps
-
-# 外部访问 z-wf REST API
-curl http://localhost:8080/api/wf/health
-
-# z-config 注册中心
-curl http://localhost:8848/api/health
+mvn clean install -DskipTests
 ```
 
-### 服务架构
+第三方与兄弟仓版本由 `z-boot-parent` → `z-boot-dependencies`（地板）+ `z-boot-fleet`（权威表）供给，
+模块 POM 不再出现字面版本钉；若构建报找不到版本，先确认能解析到 `io.github.yuku123:z-boot-parent:1.0.21`。
 
-```
-┌────────────────────────────────────────────────────────────┐
-│  z-config-server (port 8848)                                │
-│  ─ Netty + MySQL + namespace 隔离                           │
-│  ─ 服务注册中心 + 配置中心                                  │
-└────────────────────────────────────────────────────────────┘
-          ▲              ▲              ▲
-          │ register     │ discover     │
-          │              │              │
-┌────────────────────────────────────────────────────────────┐
-│  z-wf-server (port 8080)                                    │
-│  ─ z-wf-admin (Camunda 引擎 + REST API + 管理前端)            │
-│  ─ 启动时 ZNamingService.registerInstance("z-wf", ...)     │
-│  ─ @ZRpcService 暴露 WfProcessService                       │
-└────────────────────────────────────────────────────────────┘
+### 作为依赖嵌入业务方（Starter）
+
+```xml
+<dependency>
+    <groupId>io.github.yuku123</groupId>
+    <artifactId>z-wf-starter</artifactId>
+    <version>1.0.6</version>
+</dependency>
 ```
 
-外部应用接入方式: 引入 `z-rpc-spring-boot-starter` 后用
-`@ZRpcReference(WfProcessService.class)` 注入即可远程调用 (实例从 z-config 发现)。
+Starter 的 `WfStarterAutoConfiguration` 会扫描 `com.zifang.z.wf.web.api` / `.core` / `.starter`，拉起
+Controller、Camunda 引擎装配与 SPI 注册表；`z-config` / `z-rpc` 集成是可选的——classpath 不含就不加载。
 
----
-
-## 🧪 集成测试
-
-集成测试位于 [`z-opc/z-middleware-integration-test`](../z-opc/z-middleware-integration-test/)：
-
-| 测试 | 说明 | 状态 |
-|---|---|---|
-| `ZWfMavenCentralPullIT` | z-wf 3 个模块从 Maven Central 拉取 + POM 元信息校验 | ✅ |
-| `ZWfConfigRpcIntegrationIT` | z-wf + z-config + z-rpc 三方联调 (启动 + 注册 + RPC 调用) | ✅ |
+### 独立跑起来
 
 ```bash
-cd z-opc/z-middleware-integration-test
+# 1) 无外部依赖（H2 内存库，关闭 z-config/z-rpc）——最快看到 /doc.html 与管理前端
+mvn -pl z-wf-admin -am package -DskipTests
+java -jar z-wf-admin/target/z-wf-admin-1.0.6-exec.jar --spring.profiles.active=h2-test
 
-# 1. 仅验证 z-wf artifact 拉取 (不依赖服务)
-RUN_ZWF_CENTRAL_IT=true mvn test -Dtest=ZWfMavenCentralPullIT
-
-# 2. 完整三方联调 (需要 z-config server 跑起来)
-RUN_ZWF_RPC_IT=true ZCONFIG_SERVER=127.0.0.1:8848 \
-  mvn test -Dtest=ZWfConfigRpcIntegrationIT
+# 2) 连真实 MySQL：所有凭据一律经环境变量注入，禁止写进 yml/jar/镜像层
+SERVER_PORT=8080 \
+SPRING_DATASOURCE_URL='jdbc:mysql://<host>:3306/z_wf?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai' \
+SPRING_DATASOURCE_USERNAME=*** SPRING_DATASOURCE_PASSWORD=*** \
+CAMUNDA_ADMIN_USER=*** CAMUNDA_ADMIN_PASSWORD=*** \
+Z_CONFIG_ENABLED=true Z_CONFIG_SERVER_ADDR=127.0.0.1:8848 \
+Z_RPC_ENABLED=true Z_RPC_SERVER_PORT=20880 \
+  java -jar z-wf-admin/target/z-wf-admin-1.0.6-exec.jar
 ```
+
+启动后 REST 基址 `http://localhost:8080/api/...`，Knife4j 文档在 `http://localhost:8080/doc.html`
+（Knife4j 仅在 `z-wf-admin` 引入）。配置前缀：`spring.datasource.*` / `camunda.bpm.*` / `z.config.*` / `z.rpc.*`，
+对应环境变量名见 `z-wf-admin/src/main/resources/application.properties`。`h2-test` profile（见同名 properties）
+自动部署 `classpath*:processes/*.bpmn` 并把 `z.config.enabled` / `z.rpc.enabled` 关掉。
 
 ---
 
-## 🔧 高级配置
+## 🔌 API 一览
 
-### 自定义 BPMN 流程
+服务前缀由 `server.port` + `server.servlet.context-path` 决定（默认 `8080` + `/`），下表为各 Controller 的类级映射：
 
-把你的 BPMN 文件放到 `src/main/resources/processes/` 目录, Camunda 启动时会自动部署。
-或者在 application.yml 里指定:
+| 路径前缀 | Controller | 关键端点 |
+|----------|------------|----------|
+| `/api/approval-center` | `ApprovalCenterController` | `GET /dashboard`、`GET /tasks/todo`、`GET /tasks/done`、`GET /tasks/get`、`POST /tasks/complete`、`GET /my-processes`、`GET /processes/get`、`POST /processes/start`、`GET /processes/definitions`、`GET /processes/search`、`GET /processes/versions`、`POST /processes/definitions/suspend`、`POST /processes/definitions/activate`、`DELETE /processes` |
+| `/api/wf/process` | `ProcessOperationController` | `POST /suspend`、`POST /activate`、`POST /comment`、`GET /comments`、`GET /trail`、`GET /overview` |
+| `/api/wf/task` | `TaskOperationController` | `POST /transfer`、`POST /delegate`、`POST /claim`、`POST /withdraw`、`POST /jump`、`POST /force-complete` |
+| `/api/wf/group` | `GroupController` | `GET /list`、`POST /set`、`GET /processes`、`DELETE` |
+| `/api/leave` | `LeaveProcessController` | `POST /start`、`GET /todo`、`GET /getApprovalTasks`、`POST /complete` |
+| `/api/wf` | `WfBaseHealthController` | `GET /health` |
 
-```yaml
-camunda.bpm:
-  deployment-resources:
-    - classpath:processes/leaveProcess.bpmn
-    - classpath:processes/customFlow.bpmn
-```
+分页统一返回 `z-util` 的 `PageResult`（近期从各自拼装的页结构收敛过来）。鉴权由 `z-ctc` 统一拦截，本仓不做。
 
-### 与 z-rpc 暴露流程服务
+---
+
+## 🧩 扩展模型（钩子 + SPI）
+
+**钩子（3 个接口，`com.zifang.z.wf.core.hook`）** —— 本地 Bean 方式在生命周期节点插逻辑：
+`WfProcessHook`（`onBeforeStart` / `onAfterStart` / `onComplete`）、
+`WfTaskHook`（`onBeforeCreate` / `onAssigneeChanged` / `onBeforeComplete` / `onAfterComplete`）、
+`WfNotificationHook`（`notifyTaskAssigned` / `notifyApprovalResult` / `notifyOverdue`）。全部 `default` 方法，按需覆盖。
+
+**SPI 扩展点（22 个接口，`com.zifang.z.wf.core.spi`，蒸馏自 ace-platform-sdk）** —— 分四大类：
+表单（初始化 / 校验 / 暂存 / 提交 / 查询 / 修改 / 删除的前后置与校验）、
+审批（`AgreePre` / `AgreePost` / `AgreeValidate` / `RejectValidate`）、
+流程（`WorkflowContextInject` / `WorkflowLogicAssigneeInject` / `WorkflowLogicAssigneeCall`）、
+Apex（`ApexListStaff` / `ApexListDept`）。
 
 ```java
-@ZRpcService(interfaceClass = WfProcessService.class, group = "default", version = "1.0.0")
-public class WfProcessServiceImpl implements WfProcessService {
-    @Autowired private RuntimeService runtimeService;
-
+@Component
+@WfSpi(name = "示例-表单发起前处理", code = "FormDataSubmitPreHandlerService", group = "表单", order = 10)
+public class MyPreHandler implements WfFormDataSubmitPreHandlerService {
     @Override
-    public String startProcess(String processKey, Map<String, Object> vars) {
-        return runtimeService.startProcessInstanceByKey(processKey, vars).getId();
+    public Result<Map<String, Object>> preHandler(WfExtensionContext context, Map<String, Object> data) {
+        // 校验 / 补默认值 / 转换后返回
+        return Result.success(data);
     }
 }
 ```
 
-### 与 z-config 做服务发现
+`WfSpiRegistry` 启动时扫描 Spring 容器里实现了这 22 个接口且带 `@WfSpi` 的 Bean，按 `code` 归组、按 `order`
+升序排列；`LeaveProcessService` 在流程启动 / 完成节点通过它分发对应 SPI（如提交前后置、审批前后置）。
+`z-wf-starter` 的 `audit` 包（`ComprehensiveSpiBundle` / `AuditAggregator`）提供一次性覆盖 22 个 SPI 的计数夹具，供端到端测试验证全链路。
 
-```java
-@Autowired private ZNamingService znaming;
+### 服务注册与远程调用（可选）
 
-// 业务方拿 z-wf 实例
-List<ZNamingInstance> instances = znaming.getAllInstances("z-wf");
-ZNamingInstance one = znaming.selectOneHealthyInstance("z-wf");
-```
+`WfServerLifecycle` 在 `ContextRefreshedEvent` 时，若 classpath 含 z-config 客户端，就调
+`ZNamingService.registerInstance(serviceName, ip, rpcPort, "DEFAULT")` 把实例注册进 z-config
+（`serviceName` 取 `spring.application.name`，默认 `z-wf`；`rpcPort` 默认 `20880`）。注册失败不阻塞启动。
+`WfProcessRpcServiceImpl` 用 `@ZRpcService(interfaceClass = WfProcessRpcService.class, version = "1.0.0")`
+暴露流程服务，外部方经 `@ZRpcReference(WfProcessRpcService.class)` 从 z-config 发现实例后远程调用。
+配置前缀：`z.config.enabled` / `z.config.server-addr` / `z.config.namespace`，`z.rpc.enabled` / `z.rpc.server.port` /
+`z.rpc.registry.type=z-config` / `z.rpc.registry.address` / `z.rpc.service`（对应环境变量见 `application.properties`）。
 
 ---
 
-## 🤝 贡献
+## 🧪 测试
+
+真正的测试在 `z-wf-admin/src/test/java`，是两个基于 Camunda 引擎的端到端用例，跑在 H2 内存库上、
+不依赖任何外部服务（`@SpringBootTest(classes = ZWfAdminApplication.class, RANDOM_PORT)` + `@ActiveProfiles("h2-test")`）：
+
+| 测试 | 覆盖 |
+|------|------|
+| `LeaveProcessEndToEndTest` | `leaveProcess.bpmn` 全流程：发起 → SubmitPre/Post SPI → 审批查询 → 完成 → AgreePre/Post SPI → approved/rejected 分支流转 → 历史审计 |
+| `FiveLookEndToEndTest` | `fiveLookEvaluation.bpmn` 多步评分 → 决策网关（加权分阈值）→ CEO 终审 → 3 路终态；22 个 SPI 接口全覆盖 + 调用顺序一致性 |
 
 ```bash
-mvn clean install                              # 安装到本地 .m2
-mvn -pl z-wf-starter package -DskipTests       # 单独打 starter 包 (纯库)
-mvn -pl z-wf-admin -am package -DskipTests     # 打可执行 fat jar (z-wf-admin-*-exec.jar)
-bash deploy_maven_center.sh publish            # 发布到 Maven Central (本地终端跑, admin 不会发布)
+# 端到端测试依赖 reactor 里的 core/web/starter，用 -am 一起构建
+mvn -pl z-wf-admin -am test
+# 或从根跑全量（其余模块当前无单测）
+mvn test
 ```
 
----
-
-## 📄 许可证
-
-[Apache License 2.0](LICENSE)
+> 注意：旧 README 指向的 `../z-opc/z-middleware-integration-test` 里的 `ZWfMavenCentralPullIT` /
+> `ZWfConfigRpcIntegrationIT` 在当前组织内并不存在，相关测试段已按真实用例替换。
 
 ---
 
-## 🔗 相关项目
+## 🐳 部署
 
-| 项目 | 关系 |
-|---|---|
-| [z-config](https://github.com/yuku123/z-opc-foundation) | **z-wf 的官方注册中心**, 一行接入做服务发现 |
-| [z-rpc](https://github.com/yuku123/z-opc-foundation) | **z-wf 的官方 RPC 框架**, 远程调用流程服务 |
-| [z-boot](https://github.com/yuku123/z-opc-foundation) | Spring Boot Starter 聚合 + BOM |
-| [z-cache](https://github.com/yuku123/z-opc-foundation) | 同系列 — 分布式缓存 |
-| [z-mq](https://github.com/yuku123/z-opc-foundation) | 同系列 — 分布式消息队列 |
+```bash
+# 本地一键三服务编排（mysql + z-config 注册中心 + z-wf）
+docker compose up -d
+docker compose ps
+curl http://localhost:8080/api/wf/health     # z-wf REST
+```
+
+`docker-compose.yml` 拉起三个服务：`mysql:8.0`（z-config 与 Camunda 共用，生产建议拆开）、
+`z-config`（context `../z-config`，端口 8848）、`z-wf`（本仓 `Dockerfile`，端口 8080）。compose 里
+数据库口令与 z-config 地址是本地编排用演示值，生产通过替换 service 的 `SPRING_DATASOURCE_*` /
+`Z_CONFIG_SERVER_ADDR` 等环境变量注入，切勿提交真实凭证。
+
+`Dockerfile` 是多阶段构建：build 阶段 `maven:3.9.9-eclipse-temurin-8` 先 `mvn -N install` 父 POM、再
+`-pl z-wf-admin -am clean package` 打出 fat jar；runtime 阶段 `eclipse-temurin:8-jre`、非 root 用户（uid 10001）、
+`EXPOSE 8080`，`HEALTHCHECK` 打 `${SERVER_CONTEXT_PATH}/api/wf/health`，入口类 `com.zifang.z.wf.admin.ZWfAdminApplication`，
+JVM 参数经 `JVM_OPTS` 覆盖。
+
+发布到 Maven Central 用 `_doc/003_script/deploy_maven_center.sh`（`publish` / `verify`），admin 因
+`excludeArtifacts` 不会被发布。
 
 ---
 
-## 📮 联系
+## 📄 License
 
-- GitHub: [yuku123/z-opc-foundation](https://github.com/yuku123/z-opc-foundation)
-- Email: yuku123@users.noreply.github.com
+许可证见仓库根 [`LICENSE`](LICENSE)，为 **MIT License**。
 
+> 提示：根 POM 与各模块 POM 的 `<licenses>` 仍声明 "Apache License, Version 2.0"，与 LICENSE 文件不一致；
+> 以 LICENSE 文件为准。
+
+---
 
 ## 文档目录
 
-本项目文档统一收口在 `_doc/` 下:
+本项目文档统一收口在 `_doc/` 下：
 
-- [`_doc/003_script/`](_doc/003_script/) — 运维脚本:
-  - [`deploy_maven_center.sh`](_doc/003_script/deploy_maven_center.sh)
-  - [`install-settings.sh`](_doc/003_script/install-settings.sh)
-  - [`wf-demo.sh`](_doc/003_script/wf-demo.sh)
+- [`_doc/003_script/`](_doc/003_script/) — 运维与工具脚本（本仓 `_doc/` 目前唯一有内容的子目录）：
+  - [`deploy_maven_center.sh`](_doc/003_script/deploy_maven_center.sh) — 编译并发布到 Maven Central（`publish` / `verify`）
+  - [`install-settings.sh`](_doc/003_script/install-settings.sh) — 写入 Maven Central 凭证到 `~/.m2/settings.xml`（用 `CENTRAL_USERNAME` / `CENTRAL_TOKEN` 环境变量占位，不落明文）
+  - [`gen_wf_spi.py`](_doc/003_script/gen_wf_spi.py) — 批量生成器，把 ace-platform-sdk 的 22 个 SPI 接口蒸馏到 `z-wf-core`
+  - [`wf-demo.sh`](_doc/003_script/wf-demo.sh) — 端到端演示脚本（健康检查 / 流程定义 / 启动请假流程）
 
-各文档详细说明见各子目录。
+> `_doc/001_arch/`、`_doc/002_deploy/`、`_doc/004_skill/` 目前均为空目录，尚无归档文档；
+> 架构与部署说明现内联在本 README 上文，脚本归 `_doc/003_script/`。
+
+- [`_doc/001_arch/`](_doc/001_arch/) — 架构文档（目前为空目录，暂无内容）
+- [`_doc/002_deploy/`](_doc/002_deploy/) — 部署 SQL（目前为空目录，建表由 Camunda `schema-update` 与脚本自理）
+- [`_doc/004_skill/`](_doc/004_skill/) — AI skill 定义（目前为空目录，暂无 skill）
+
+_Maintained by the z-opc-foundation organization._
