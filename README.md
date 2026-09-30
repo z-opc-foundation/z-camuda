@@ -274,10 +274,10 @@ JVM 参数经 `JVM_OPTS` 覆盖。
   - [`wf-demo.sh`](_doc/003_script/wf-demo.sh) — 端到端演示脚本（健康检查 / 流程定义 / 启动请假流程）
 
 > `_doc/001_arch/`、`_doc/002_deploy/`、`_doc/004_skill/` 目前均为空目录，尚无归档文档；
-> 架构与部署说明现内联在本 README 上文，脚本归 `_doc/003_script/`。
+> 架构与部署说明现内联在本 README 上文，脚本归 [`_doc/003_script/`](_doc/003_script/)。
 
-- [`_doc/001_arch/`](_doc/001_arch/) — 架构文档（目前为空目录，暂无内容）
-- [`_doc/002_deploy/`](_doc/002_deploy/) — 部署 SQL（目前为空目录，建表由 Camunda `schema-update` 与脚本自理）
-- [`_doc/004_skill/`](_doc/004_skill/) — AI skill 定义（目前为空目录，暂无 skill）
+- `_doc/001_arch/` — 架构文档（目前为空目录，暂无内容）
+- `_doc/002_deploy/` — 部署 SQL（目前为空目录，建表由 Camunda `schema-update` 与脚本自理）
+- `_doc/004_skill/` — AI skill 定义（目前为空目录，暂无 skill）
 
 _Maintained by the z-opc-foundation organization._
