@@ -74,6 +74,25 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
         </dependency>
+
+        <!-- host 桥接类 (CamundaConfig: camundaBpmDataSource / camundaBpmTransactionManager) 编译期需要 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- @ConditionalOnProperty 注解的宿主端自动装配 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <!-- maven-compiler-plugin 这条"只为继承配置"的声明删掉，口径由父链 pluginManagement 下发
