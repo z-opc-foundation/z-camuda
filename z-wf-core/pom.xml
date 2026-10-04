@@ -59,6 +59,16 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
         </dependency>
+
+        <!-- 2026-10-04: LogicFlowGraphConverter 的测试。
+             本模块此前零测试依赖, 也就是零会跑的测试。给一个「转换器」写 main() 自测
+             等于写一个永远不会被 mvn test 触发的文件 —— 看着像有测试, 实际 CI 一声不响。
+             坐标与 z-wf-admin 同款(surefire 2.22.2 + JUnit 5 由父链 pluginManagement 下发)。 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <!-- 这一段 <build><plugins> 里"只为继承 compiler 配置而存在"的 maven-compiler-plugin 声明删掉了：
