@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.github.yuku123</groupId>
+        <artifactId>z-camuda</artifactId>
+        <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <groupId>io.github.yuku123</groupId>
+
+    <artifactId>z-camuda-core</artifactId>
+    <name>z-camuda-core</name>
+    <description>工作流引擎核心模块 — Camunda 封装 + 钩子接口</description>
+    <url>https://github.com/yuku123/z-opc-foundation/tree/main/z-camuda/z-camuda-core</url>
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <id>yuku123</id>
+            <name>zifang</name>
+            <email>yuku123@users.noreply.github.com</email>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:git://github.com/yuku123/z-opc-foundation.git</connection>
+        <developerConnection>scm:git:ssh://github.com/yuku123/z-opc-foundation.git</developerConnection>
+        <url>https://github.com/yuku123/z-opc-foundation/tree/main/z-camuda</url>
+    </scm>
+
+    <dependencies>
+        <!-- Camunda -->
+        <dependency>
+            <groupId>org.camunda.bpm.springboot</groupId>
+            <artifactId>camunda-bpm-spring-boot-starter</artifactId>
+        </dependency>
+
+        <!-- Spring Boot -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <!-- z-util-core (Result / PageResult / StatusCode 等通用类型) -->
+        <dependency>
+            <groupId>io.github.yuku123</groupId>
+            <artifactId>z-util-core</artifactId>
+        </dependency>
+
+        <!-- log4j2 (SPI Registry 日志) -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+        </dependency>
+
+        <!-- 2026-10-04: LogicFlowGraphConverter 的测试。
+             本模块此前零测试依赖, 也就是零会跑的测试。给一个「转换器」写 main() 自测
+             等于写一个永远不会被 mvn test 触发的文件 —— 看着像有测试, 实际 CI 一声不响。
+             坐标与 z-camuda-admin 同款(surefire 2.22.2 + JUnit 5 由父链 pluginManagement 下发)。 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <!-- 这一段 <build><plugins> 里"只为继承 compiler 配置而存在"的 maven-compiler-plugin 声明删掉了：
+         生命周期绑定照样会跑 compiler，版本与 source/target 8 + UTF-8 + -parameters 由父链
+         z-boot-parent 的 pluginManagement 下发；本模块自己不留无 version 的插件声明
+         （central_pom_scan 的 E 类：静态扫描看不穿 repo1 上的外部 parent，只会报"无 version 且父链无兜底"，
+         同 z-graph 迁移时的处理）。实测迁移后本模块产物仍是 class-file major 52。 -->
+</project>

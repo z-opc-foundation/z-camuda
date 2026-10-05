@@ -1,14 +1,14 @@
-# z-wf Docker Compose — 三服务编排 (mysql + z-config 注册中心 + z-wf 服务端)
+# z-camuda Docker Compose — 三服务编排 (mysql + z-config 注册中心 + z-camuda 服务端)
 #
 # 使用:
 #   docker compose up -d          # 启动
 #   docker compose ps             # 查看状态
-#   docker compose logs -f z-wf   # 查看 z-wf 日志
+#   docker compose logs -f z-camuda   # 查看 z-camuda 日志
 #   docker compose down           # 停止
 #
 # 端口映射:
 #   z-config-server  -> 8848 (Netty + HTTP)
-#   z-wf-server      -> 8080 (REST API + 管理前端)
+#   z-camuda-server      -> 8080 (REST API + 管理前端)
 
 version: '3.8'
 
@@ -63,13 +63,13 @@ services:
     restart: unless-stopped
 
   # ============================================================
-  # z-wf-server (工作流引擎服务端, 注册到 z-config)
+  # z-camuda-server (工作流引擎服务端, 注册到 z-config)
   # ============================================================
-  z-wf:
+  z-camuda:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ${ZWF_IMAGE:-z-wf:latest}
+    image: ${ZWF_IMAGE:-z-camuda:latest}
     container_name: zwf-server
     depends_on:
       - z-config
@@ -92,7 +92,7 @@ services:
       Z_RPC_PROTOCOL: zrpc
       Z_RPC_REGISTRY_TYPE: z-config
       Z_RPC_REGISTRY_ADDRESS: z-config:8848
-      Z_RPC_SERVICE: z-wf
+      Z_RPC_SERVICE: z-camuda
     ports:
       - "8080:8080"
     networks:

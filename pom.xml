@@ -9,7 +9,7 @@
          ② 兄弟仓版本权威 z-boot-fleet:1.0.0（import 进来，覆盖每个兄弟仓的对外坐标，含 z-config/z-rpc/z-util）
          ③ Java 8 构建口径（pluginManagement：compiler source/target 8 + -parameters、surefire 2.22.2 …）
          迁移前这里是**自包含根 pom**（没有 <parent>，版本表 5 格自己摊），对外发的是 flatten `oss`
-         之后的自包含 raw pom（现读 repo1：z-wf / z-wf-core 的中央 pom `<parent>` 计数都是 0）
+         之后的自包含 raw pom（现读 repo1：z-camuda / z-camuda-core 的中央 pom `<parent>` 计数都是 0）
          ⇒ 形状由本仓既有的常开 flatten 保住，不随这次迁移改变。
          relativePath 必须留空：parent 不在磁盘上，在 repo1。 -->
     <parent>
@@ -20,11 +20,11 @@
     </parent>
 
     <groupId>io.github.yuku123</groupId>
-    <artifactId>z-wf</artifactId>
+    <artifactId>z-camuda</artifactId>
     <version>${revision}</version>
     <packaging>pom</packaging>
 
-    <name>z-wf (Workflow Engine)</name>
+    <name>z-camuda (Workflow Engine)</name>
     <description>基于 Camunda 的工作流引擎, 支持流程定义、任务管理、审批中心。提供钩子接口供业务方扩展。</description>
 
     <url>https://github.com/yuku123/z-opc-foundation</url>
@@ -47,18 +47,18 @@
     <scm>
         <connection>scm:git:git://github.com/yuku123/z-opc-foundation.git</connection>
         <developerConnection>scm:git:ssh://github.com/yuku123/z-opc-foundation.git</developerConnection>
-        <url>https://github.com/yuku123/z-opc-foundation/tree/main/z-wf</url>
+        <url>https://github.com/yuku123/z-opc-foundation/tree/main/z-camuda</url>
     </scm>
 
     <modules>
-        <module>z-wf-core</module>
-        <module>z-wf-web</module>
-        <module>z-wf-starter</module>
+        <module>z-camuda-core</module>
+        <module>z-camuda-web</module>
+        <module>z-camuda-starter</module>
         <!--
-            z-wf-admin: 独立可启动应用, 留 reactor 享受统一构建, 但 own-parent +
+            z-camuda-admin: 独立可启动应用, 留 reactor 享受统一构建, 但 own-parent +
             maven.deploy.skip=true, 永远不上 Maven Central (对齐 z-schedule-admin).
         -->
-        <module>z-wf-admin</module>
+        <module>z-camuda-admin</module>
     </modules>
 
     <properties>
@@ -69,7 +69,7 @@
              · z-boot.version=1.0.17：那条 z-boot-dependencies 的 import 一起删——父链供的是 1.0.19，
                留着自己的那一格就是"每个仓各起一张版本表"这笔账本身。
              · z-util.version=1.0.13：键名父链没有，但 fleet **按坐标**管着 z-util-core/aop/dsl/http/
-               parser-json/proxy 六件且面值同为 1.0.13 ⇒ 该删（连 root 的 6 条 DM + z-wf-web 的 1 处引用）。
+               parser-json/proxy 六件且面值同为 1.0.13 ⇒ 该删（连 root 的 6 条 DM + z-camuda-web 的 1 处引用）。
              ⚠ 本仓 `<version>` 用的仍是 CI-friendly 的 ${revision}：flatten 走 `oss`，发布态会把
              ${revision}/${project.version} 都落成字面量（对照上面 repo1 现读的 parent=0 形状）。 -->
         <revision>1.0.6</revision>
@@ -102,33 +102,33 @@
                  原本只有 core/web/starter 三条、且写的是 ${revision}；现在补齐 5 条并统一成
                  ${project.version}（本仓 flatten 是 `oss`，会把 `${project.version}` 落成字面量，
                  所以不会踩 z-boot-parent 那条"${project.version 在 resolveCiFriendliesOnly 下不能用}"的雷）。
-                 这一格不是装饰：继承来的 DM 会改写**传递依赖**的版本，而 fleet 里压根没有 z-wf 那一格
-                 （现读 z-boot-fleet/pom.xml：z-wf 命中 0 条），不钉就得靠各模块写字面 1.0.5——
+                 这一格不是装饰：继承来的 DM 会改写**传递依赖**的版本，而 fleet 里压根没有 z-camuda 那一格
+                 （现读 z-boot-fleet/pom.xml：z-camuda 命中 0 条），不钉就得靠各模块写字面 1.0.5——
                  写字面值的下场就是仓内构建哪天忘了抬号，会把旧发布件的字节码混进新版本。 -->
             <dependency>
                 <groupId>io.github.yuku123</groupId>
-                <artifactId>z-wf</artifactId>
+                <artifactId>z-camuda</artifactId>
                 <version>${project.version}</version>
                 <type>pom</type>
             </dependency>
             <dependency>
                 <groupId>io.github.yuku123</groupId>
-                <artifactId>z-wf-core</artifactId>
+                <artifactId>z-camuda-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.yuku123</groupId>
-                <artifactId>z-wf-web</artifactId>
+                <artifactId>z-camuda-web</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.yuku123</groupId>
-                <artifactId>z-wf-starter</artifactId>
+                <artifactId>z-camuda-starter</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.yuku123</groupId>
-                <artifactId>z-wf-admin</artifactId>
+                <artifactId>z-camuda-admin</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -144,7 +144,7 @@
             <!-- ===== 必须留下的两格：父链完全不供（按坐标判，不是按键名判）=====
                  · io.swagger.core.v3:swagger-annotations —— 地板只字面管 io.swagger:swagger-annotations
                    （1.6.6，groupId 不同的另一族），spring-boot-dependencies 也不管 swagger ⇒ 删键当场悬空，
-                   z-wf-web 那条 provided 依赖就没有版本了。面值维持本仓的 2.2.8。
+                   z-camuda-web 那条 provided 依赖就没有版本了。面值维持本仓的 2.2.8。
                  · log4j-slf4j2-impl 2.26.1 —— 地板只有 log4j-slf4j-**1.x** 那一支（log4j-slf4j-impl 2.25.4），
                    对 slf4j2 的 impl 一条都不管；这一件在树里是 z-util-core:1.0.13 的传递依赖（它自己
                    DM 里也是 2.26.1）。删掉本条就等于"由 z-util 的 pom 替本仓决定日志绑定版本"，
@@ -179,7 +179,7 @@
                      resolveCiFriendliesOnly），**不下发**给消费仓 ⇒ 加了 <parent> 之后必须由本仓自己
                      把 pom 扁平掉，否则发出去的是"带着 z-boot-parent:1.0.19 的 raw pom"，而本仓被删掉的那些
                      版本格已经不在自己 pom 里了。判据按**本仓中央上是什么形状**：现读 repo1
-                     （ranged GET 206）z-wf / z-wf-core / z-wf-starter 的 1.0.5 pom `<parent>` 计数都是 0、
+                     （ranged GET 206）z-camuda / z-camuda-core / z-camuda-starter 的 1.0.5 pom `<parent>` 计数都是 0、
                      com.zifang 计数 0、悬空 ${} 0 个 ⇒ 本仓一直是自包含形状，这条 flatten `oss` +
                      updatePomFile 就是保住它的东西 ⇒ 保持**常开**，不挂 `central` profile
                      （挂 profile 时不带 -P central 的 `mvn install` 会把带 parent 的废 pom 装进仓里）。
@@ -292,7 +292,7 @@
                             <publishingServerId>central</publishingServerId>
                             <!-- 本插件不认 maven.deploy.skip，admin 仍会进 bundle，必须显式排除 -->
                             <excludeArtifacts>
-                                <excludeArtifact>z-wf-admin</excludeArtifact>
+                                <excludeArtifact>z-camuda-admin</excludeArtifact>
                             </excludeArtifacts>
                             <tokenAuth>true</tokenAuth>
                             <autoPublish>true</autoPublish>

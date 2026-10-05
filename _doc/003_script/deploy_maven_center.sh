@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================
-# z-wf Maven Central 发布脚本
+# z-camuda Maven Central 发布脚本
 # ============================================================
 # 用法:
 #   ./deploy_maven_center.sh publish   - 编译并发布到 Maven Central
@@ -48,7 +48,7 @@ verify_pom() {
 # 发布
 # ============================================================
 publish() {
-    log "开始发布 z-wf 到 Maven Central..."
+    log "开始发布 z-camuda 到 Maven Central..."
     cd "$REPO_ROOT"
 
     # 1. 清理
@@ -65,10 +65,10 @@ publish() {
 
     # 4. 发布 (central profile: sources + javadoc + gpg 签名 + Central Portal 上传)
     log "4/4 发布到 Maven Central..."
-    mvn deploy -Pcentral -DskipTests 2>&1 | tee /tmp/z-wf-deploy.log
+    mvn deploy -Pcentral -DskipTests 2>&1 | tee /tmp/z-camuda-deploy.log
 
     # 检查结果
-    if grep -q "BUILD SUCCESS" /tmp/z-wf-deploy.log; then
+    if grep -q "BUILD SUCCESS" /tmp/z-camuda-deploy.log; then
         log "✅ BUILD SUCCESS"
     else
         err "❌ BUILD FAILED"
@@ -76,13 +76,13 @@ publish() {
 
     # 提取 Deployment ID
     local deployment_id
-    deployment_id=$(grep -o 'deploymentId: [a-f0-9\-]*' /tmp/z-wf-deploy.log | head -1 | awk '{print $2}')
+    deployment_id=$(grep -o 'deploymentId: [a-f0-9\-]*' /tmp/z-camuda-deploy.log | head -1 | awk '{print $2}')
     if [ -n "$deployment_id" ]; then
         log "✅ Bundle uploaded"
         log "   Deployment ID: $deployment_id"
         log "   Central Portal: https://central.sonatype.com/publishing/deployments"
     else
-        log "⚠️  未找到 Deployment ID, 请检查 /tmp/z-wf-deploy.log"
+        log "⚠️  未找到 Deployment ID, 请检查 /tmp/z-camuda-deploy.log"
     fi
 }
 

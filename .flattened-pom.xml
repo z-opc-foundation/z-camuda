@@ -3,10 +3,10 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.yuku123</groupId>
-  <artifactId>z-wf</artifactId>
+  <artifactId>z-camuda</artifactId>
   <version>1.0.6</version>
   <packaging>pom</packaging>
-  <name>z-wf (Workflow Engine)</name>
+  <name>z-camuda (Workflow Engine)</name>
   <description>基于 Camunda 的工作流引擎, 支持流程定义、任务管理、审批中心。提供钩子接口供业务方扩展。</description>
   <url>https://github.com/yuku123/z-opc-foundation</url>
   <licenses>
@@ -25,6 +25,6 @@
   <scm>
     <connection>scm:git:git://github.com/yuku123/z-opc-foundation.git</connection>
     <developerConnection>scm:git:ssh://github.com/yuku123/z-opc-foundation.git</developerConnection>
-    <url>https://github.com/yuku123/z-opc-foundation/tree/main/z-wf</url>
+    <url>https://github.com/yuku123/z-opc-foundation/tree/main/z-camuda</url>
   </scm>
 </project>

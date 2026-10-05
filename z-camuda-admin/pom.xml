@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+        z-camuda-admin: 独立可启动应用 (docker 镜像源 / 本地 java -jar 演示), 永不上 Maven Central.
+        对齐 z-schedule-admin 模式: own-parent (spring-boot-starter-parent) + maven.deploy.skip=true.
+        <version> 与依赖的 z-camuda-starter 版本必须与 ../pom.xml 的 <revision> 保持一致.
+        本地启动: mvn spring-boot:run  (端口/context-path 见 application.properties)
+    -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.7.12</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>io.github.yuku123</groupId>
+    <artifactId>z-camuda-admin</artifactId>
+    <version>1.0.6</version>
+    <packaging>jar</packaging>
+    <name>z-camuda :: admin (Standalone App, NOT published to Central)</name>
+    <description>z-camuda 独立可启动应用 — Camunda 引擎 + 审批中心 REST + 自带管理前端. 不发 Maven Central.</description>
+
+    <properties>
+        <!-- 与 ../pom.xml <revision> 同步 -->
+        <z-camuda.version>1.0.6</z-camuda.version>
+        <!-- 与 z-boot-parent 里那一格同名同值：fleet 是不可覆盖的独立发布件，抬号必须显式写。
+             2026-09-29 消费者轮抬到 1.0.1（= z-boot-parent:1.0.21 import 的那一份）：
+             停在 1.0.0 会让本模块 import 的兄弟仓面值落后一整批。 -->
+        <z-boot-fleet.version>1.0.1</z-boot-fleet.version>
+        <maven.deploy.skip>true</maven.deploy.skip>
+        <java.version>8</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- 兄弟仓 z-* 的版本权威：直接 import z-boot-fleet（和 z-boot-parent 供的是同一份，
+                 gen_fleet_bom.py 逐件核过 repo1 才落笔）。本模块的 <parent> 是 spring-boot-starter-parent
+                 —— 建仓就有的独立应用形状（maven.deploy.skip，永不上 Central），所以内部件只能靠这条
+                 import 接权威，第三方一格不动：挂到 z-boot-parent 上会连带动 Boot/jackson/日志绑定换栈。
+                 属性名跟着 z-boot-parent 走，抬 fleet 号时 `z-boot-fleet.version` 一处 grep 全组织。 -->
+            <dependency>
+                <groupId>io.github.yuku123</groupId>
+                <artifactId>z-boot-fleet</artifactId>
+                <version>${z-boot-fleet.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- z-camuda 全栈: core (Camunda 引擎) + web (REST) + starter (自动装配 + z-config/z-rpc 可选集成) -->
+        <dependency>
+            <groupId>io.github.yuku123</groupId>
+            <artifactId>z-camuda-starter</artifactId>
+            <version>${z-camuda.version}</version>
+        </dependency>
+
+        <!-- z-config 服务注册 + z-rpc RPC 暴露 (starter 里是 optional 不传递,
+             独立部署形态必须在此显式声明, 否则 CamudaServerLifecycle 的服务注册失效).
+             两条**字面** <version>1.0.1/1.0.2</version> 已删, 版本由上面 import 的 z-boot-fleet 供：
+             z-config-spring-boot-starter 1.0.1 → 1.0.8、z-rpc-spring-boot-starter 1.0.2 → 1.0.3
+             （与本仓 z-camuda-starter 同一格，两处的账见 z-camuda-starter/pom.xml 的注释）。 -->
+        <dependency>
+            <groupId>io.github.yuku123</groupId>
+            <artifactId>z-config-spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.yuku123</groupId>
+            <artifactId>z-rpc-spring-boot-starter</artifactId>
+        </dependency>
+
+        <!-- MySQL (流程引擎持久化, 旧坐标 boot BOM 不管理, 与 z-camuda parent 锁同版) -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.33</version>
+        </dependency>
+
+        <!-- Druid 连接池 -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid-spring-boot-starter</artifactId>
+            <version>1.2.18</version>
+        </dependency>
+
+        <!-- H2 内存数据库 (h2-test profile: 端到端测试 / 无外部依赖演示) -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+        </dependency>
+
+        <!-- Knife4j API 文档 (doc.html) -->
+        <dependency>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-openapi3-spring-boot-starter</artifactId>
+            <version>4.1.0</version>
+        </dependency>
+
+        <!-- 日志: log4j2 替换默认 logback -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-log4j2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+        </dependency>
+
+        <!-- 端到端测试 (JUnit 5 + Spring Boot Test) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- 可执行 fat jar 打包 (classifier=exec: 主 artifact 保持 thin jar, 对齐 z-schedule-admin).
+                 execution id 必须写成 repackage 以覆盖 spring-boot-starter-parent 自带的同名 execution,
+                 否则会触发两次 repackage (主 jar 被替换成 fat + exec jar 再 attach 一次) -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>repackage</id>
+                        <goals><goal>repackage</goal></goals>
+                        <configuration>
+                            <classifier>exec</classifier>
+                            <mainClass>com.zifang.z.camuda.admin.ZCamudaAdminApplication</mainClass>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
