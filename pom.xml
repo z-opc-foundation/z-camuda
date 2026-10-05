@@ -269,6 +269,9 @@
                         <version>3.2.7</version>
                         <configuration>
                             <skip>${central.gpg.skip}</skip>
+                            <!-- 显式指定签名密钥（原 z-wf 时期靠默认选择，重命名后明确钉住）。
+                                 该密钥与 z-util 共用密钥对，指纹 E3DCF6F8…5DA6，属公开信息。 -->
+                            <keyname>E3DCF6F856759D910C084A5FA403FCCFD7EF5DA6</keyname>
                             <gpgArguments>
                                 <arg>--pinentry-mode</arg>
                                 <arg>loopback</arg>
