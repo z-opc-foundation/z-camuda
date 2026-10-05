@@ -225,8 +225,15 @@ mvn -pl z-camuda-admin -am test
 mvn test
 ```
 
-> 注意：旧 README 指向的 `../z-opc/z-middleware-integration-test` 里的 `ZCamudaMavenCentralPullIT` /
-> `ZCamudaConfigRpcIntegrationIT` 在当前组织内并不存在，相关测试段已按真实用例替换。
+> 发布件是否真的可从 Maven Central 拉取，用本仓自带的闸门验（它在真实 Central 上跑，
+> 校验 jar/sources/javadoc/签名/POM metadata/sources.jar 内容）：
+>
+> ```bash
+> bash _doc/003_script/verify_central.sh
+> ```
+>
+> 原本承载这件事的 `z-opc/z-middleware-integration-test` 已删除 —— 它把各中间件的发布件
+> 验证集中放在 z-opc 里，位置不对（各仓该验自己的构件），已改为各仓自验。
 
 ---
 
