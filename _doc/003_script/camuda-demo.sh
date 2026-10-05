@@ -10,10 +10,10 @@
 # ============================================================
 set -e
 
-Z_WF_HOST="${Z_WF_HOST:-127.0.0.1}"
-Z_WF_PORT="${Z_WF_PORT:-18080}"
-Z_WF_RPC_HOST="${Z_WF_RPC_HOST:-127.0.0.1}"
-Z_WF_RPC_PORT="${Z_WF_RPC_PORT:-20880}"
+Z_CAMUDA_HOST="${Z_CAMUDA_HOST:-127.0.0.1}"
+Z_CAMUDA_PORT="${Z_CAMUDA_PORT:-18080}"
+Z_CAMUDA_RPC_HOST="${Z_CAMUDA_RPC_HOST:-127.0.0.1}"
+Z_CAMUDA_RPC_PORT="${Z_CAMUDA_RPC_PORT:-20880}"
 
 ACTION="${1:-help}"
 shift || true
@@ -29,20 +29,20 @@ warn() { echo -e "\033[33m[camuda-demo]\033[0m $1"; }
 
 case "$ACTION" in
   health)
-    log "GET ${Z_WF_HOST}:${Z_WF_PORT}/api/wf/health"
-    curl -s -w "\n  HTTP %{http_code}\n" "http://${Z_WF_HOST}:${Z_WF_PORT}/api/wf/health"
+    log "GET ${Z_CAMUDA_HOST}:${Z_CAMUDA_PORT}/api/wf/health"
+    curl -s -w "\n  HTTP %{http_code}\n" "http://${Z_CAMUDA_HOST}:${Z_CAMUDA_PORT}/api/wf/health"
     ;;
   rpc-port)
-    log "检查 z-camuda Netty RPC 端口: ${Z_WF_RPC_HOST}:${Z_WF_RPC_PORT}"
-    nc -z "${Z_WF_RPC_HOST}" "${Z_WF_RPC_PORT}" && echo "  ✓ Port OPEN" || echo "  ✗ Port CLOSED"
+    log "检查 z-camuda Netty RPC 端口: ${Z_CAMUDA_RPC_HOST}:${Z_CAMUDA_RPC_PORT}"
+    nc -z "${Z_CAMUDA_RPC_HOST}" "${Z_CAMUDA_RPC_PORT}" && echo "  ✓ Port OPEN" || echo "  ✗ Port CLOSED"
     ;;
   definitions)
     log "GET /api/approval-center/processes/definitions"
-    curl -s "http://${Z_WF_HOST}:${Z_WF_PORT}/api/approval-center/processes/definitions" | python3 -m json.tool
+    curl -s "http://${Z_CAMUDA_HOST}:${Z_CAMUDA_PORT}/api/approval-center/processes/definitions" | python3 -m json.tool
     ;;
   start)
     log "POST /api/leave/start (REST API)"
-    RESP=$(curl -s -X POST "http://${Z_WF_HOST}:${Z_WF_PORT}/api/leave/start" \
+    RESP=$(curl -s -X POST "http://${Z_CAMUDA_HOST}:${Z_CAMUDA_PORT}/api/leave/start" \
       -H "Content-Type: application/json" \
       -d "{\"applicant\":\"${APPLICANT}\",\"approver\":\"${APPROVER}\",\"days\":${DAYS},\"reason\":\"${REASON}\"}")
     echo "$RESP" | python3 -m json.tool
