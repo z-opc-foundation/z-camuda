@@ -1,0 +1,2 @@
+# 不发 Maven Central 的构件（独立部署应用，maven.deploy.skip=true）
+z-camuda-admin
