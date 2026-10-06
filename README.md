@@ -180,21 +180,46 @@ Z_RPC_ENABLED=true Z_RPC_SERVER_PORT=20880 \
 流程（`WorkflowContextInject` / `WorkflowLogicAssigneeInject` / `WorkflowLogicAssigneeCall`）、
 Apex（`ApexListStaff` / `ApexListDept`）。
 
+**⚠ 22 个接口里只有 4 个真正接入了派发点**，其余 18 个是**预留扩展点**：
+
+| | code | 触发点 |
+| --- | --- | --- |
+| **已接入（4）** | `FormDataSubmitPreHandlerService` | 发起流程实例前 |
+| | `FormDataSubmitPostHandlerService` | 发起流程实例后 |
+| | `AgreePreService` | 审批任务 complete 前 |
+| | `AgreePostService` | 审批任务 complete 后 |
+| **未接入（18）** | 其余全部（表单的 init/lifecycle/validate/query/remove/temp/modify、审批的 validate、流程的三类、Apex 的两类） | **无**——见下 |
+
+`CamudaSpiRegistry` 启动时扫描 Spring 容器里实现了这 22 个接口且带 `@CamudaSpi` 的 Bean，按 `code` 归组、按 `order`
+升序排列。但注册表**只提供 `register` / `getByCode` / `stats`，没有 dispatch 方法**；派发逻辑是
+`LeaveProcessService`（示例流程）里手工写的 4 个 `getByCode` 循环。
+
+所以对那 18 个接口：**实现它不会报错、也一定会被扫描进注册表，但方法永远不会被执行。**
+判断"有没有被调用"不能看 `spiRegistry.getByCode(code)` 是否非空——**注册成功 ≠ 被调用**，
+它只证明扫描到了 Bean。
+
+**SPI 失败不中断流程**：已接入的 4 个在 `Result.isSuccess() == false` 时只记一条 warn 日志，
+**流程照常推进**（pre 类是"本次返回值被丢弃、沿用调用方传入的变量"），返回 `null` 则静默跳过。
+接口 Javadoc 原先写的是"引擎中断流程"，与实现不符，已全部订正。
+
 ```java
 @Component
 @CamudaSpi(name = "示例-表单发起前处理", code = "FormDataSubmitPreHandlerService", group = "表单", order = 10)
 public class MyPreHandler implements CamudaFormDataSubmitPreHandlerService {
     @Override
     public Result<Map<String, Object>> preHandler(CamudaExtensionContext context, Map<String, Object> data) {
-        // 校验 / 补默认值 / 转换后返回
+        // 校验 / 补默认值 / 转换后返回；返回失败只记 warn，不会中断流程
         return Result.success(data);
     }
 }
 ```
 
-`CamudaSpiRegistry` 启动时扫描 Spring 容器里实现了这 22 个接口且带 `@CamudaSpi` 的 Bean，按 `code` 归组、按 `order`
-升序排列；`LeaveProcessService` 在流程启动 / 完成节点通过它分发对应 SPI（如提交前后置、审批前后置）。
-`z-camuda-starter` 的 `audit` 包（`ComprehensiveSpiBundle` / `AuditAggregator`）提供一次性覆盖 22 个 SPI 的计数夹具，供端到端测试验证全链路。
+`z-camuda-starter` 的 `audit` 包（`ComprehensiveSpiBundle` / `AuditAggregator`）提供了覆盖 22 个 SPI 的计数夹具，
+但**端到端测试只断言了其中 4 个计数器**（`submitPre` / `submitPost` / `agreePre` / `agreePost`），
+其余 18 个计数恒为 0 —— 它验证的不是"全链路"，只是"这 4 个 code 通了"。
+
+`SpiDispatchDocumentationTest` 把「Javadoc 必须与实际派发一致」钉成护栏：它**从 main 源码树里
+提取真实的 `getByCode` 派发集合**再逐个比对 22 份 Javadoc（新增/删除派发点而不改文档，判据立刻红）。
 
 ### 服务注册与远程调用（可选）
 

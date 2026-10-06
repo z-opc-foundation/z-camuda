@@ -17,8 +17,16 @@ import java.util.Map;
  *   <li>分组 — 表单</li>
  * </ul>
  *
- * <p>业务方实现本接口，并标注 {@link CamudaSpi @CamudaSpi} 注解，
- * z-camuda 引擎会在对应生命周期点通过 {@link CamudaSpiRegistry} 调用所有实现.
+ * <p>业务方实现本接口并标注 {@link CamudaSpi @CamudaSpi} 注解后，Bean 会被
+ * {@link CamudaSpiRegistry} 扫描并按 {@code code} 注册。
+ *
+ * <p><b>⚠ 当前版本没有派发点会调用本接口。</b>引擎只在 4 个 code 上分发 SPI
+ * （{@code FormDataSubmitPreHandlerService} / {@code FormDataSubmitPostHandlerService} /
+ * {@code AgreePreService} / {@code AgreePostService}），本接口属<b>预留扩展点</b>：
+ * 实现它不会报错、也一定会被扫描进注册表，但它的方法<b>永远不会被执行</b>。
+ *
+ * <p><b>注册成功 ≠ 被调用</b>：{@code spiRegistry.getByCode(code)} 返回非空只说明
+ * 扫描到了 Bean，不说明有派发点会触发它。
  *
  * @author zifang
  */
@@ -28,7 +36,8 @@ public interface CamudaFormDataTempPreHandlerService {
      * 暂存前处理.
      *
      * @param context SPI 调用上下文（应用/模型/流程定义/实例 ID 等）
-     * @return 处理结果 — {@link Result#isSuccess()} 为 {@code false} 时引擎中断流程
+     * @return 处理结果 — <b>当前没有派发点会消费这个返回值</b>（见类级说明），
+     *         实现里的返回值语义不会对流程产生任何影响
      */
     Result<Map<String, Object>> preHandler(CamudaExtensionContext context, Map<String, Object> data);
 }
