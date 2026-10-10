@@ -16,7 +16,7 @@ export const menuItems = [
     { key: '/z-camuda/groups', label: '引擎分组', icon: <TeamOutlined /> },
 ]
 
-export const routeTable = [
+export const routes = [
     { path: '/z-camuda/home', Component: HomePage },
     { path: '/z-camuda/leave', Component: LeaveDemo },
     { path: '/z-camuda/groups', Component: Groups },
