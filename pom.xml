@@ -84,6 +84,26 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- z-util 抬到 1.2.2（去 Jackson 那版）：仓内 readTree / JsonNode 树导航改用自研
+                 JsonUtil / JsonCursor（com.zifang.util.json.*）。继承来的 z-boot-fleet DM 把它压在
+                 1.0.22，那版里没有 toPlainValue / JsonCursor ⇒ 不显式钉 1.2.2 编译不过。
+                 ⚠ 三条必须同笔钉：dependencyManagement 对**传递依赖**同样生效，
+                 只钉 parser-json 会被车队 BOM 把 dsl-kernel 压回旧版，造成运行期版本裂开。 -->
+            <dependency>
+                <groupId>io.github.yuku123</groupId>
+                <artifactId>z-util-core</artifactId>
+                <version>1.2.2</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.yuku123</groupId>
+                <artifactId>z-util-parser-json</artifactId>
+                <version>1.2.2</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.yuku123</groupId>
+                <artifactId>z-util-dsl-kernel</artifactId>
+                <version>1.2.2</version>
+            </dependency>
             <!-- z-boot BOM 的 import 删掉：父链（z-boot-parent 的 parent 就是 z-boot-dependencies）已经
                  把地板供进来，本仓再 import 一次只是 dm 打架的来源。代价是第三方口径从地板 1.0.17 抬到
                  1.0.19（spring-boot 2.7.12→2.7.18、spring 5.3.27→5.3.39、tomcat 9.0.75→9.0.83、

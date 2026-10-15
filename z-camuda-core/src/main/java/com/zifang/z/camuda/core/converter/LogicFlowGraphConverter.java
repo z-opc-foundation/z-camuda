@@ -1,16 +1,17 @@
 package com.zifang.z.camuda.core.converter;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.zifang.util.json.JsonCursor;
+import com.zifang.util.json.JsonUtil;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.*;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -65,8 +66,6 @@ public final class LogicFlowGraphConverter {
         NODE_TYPE_HINT.put("end", "endEvent");
     }
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-
     private LogicFlowGraphConverter() {
     }
 
@@ -101,9 +100,9 @@ public final class LogicFlowGraphConverter {
             throw new IllegalArgumentException("流程图数据为空, 无法部署");
         }
 
-        JsonNode graph;
+        JsonCursor graph;
         try {
-            graph = MAPPER.readTree(graphJson);
+            graph = JsonCursor.of(JsonUtil.parse(graphJson));
         } catch (Exception e) {
             throw new IllegalArgumentException("流程图数据不是合法 JSON: " + e.getMessage(), e);
         }
@@ -129,17 +128,17 @@ public final class LogicFlowGraphConverter {
         Map<String, FlowNode> byLogicflowId = new HashMap<>();
         boolean hasStart = false;
 
-        JsonNode nodes = graph.path("nodes");
+        JsonCursor nodes = graph.path("nodes");
         if (nodes.isArray()) {
-            for (JsonNode n : nodes) {
-                String lfId = n.path("id").asText(null);
-                String type = n.path("type").asText("");
+            for (JsonCursor n : nodes.elements()) {
+                String lfId = textOrNull(n.path("id"));
+                String type = n.path("type").asText();
                 if (lfId == null || lfId.isEmpty()) {
                     continue;
                 }
-                String name = n.path("text").path("value").asText(null);
+                String name = textOrNull(n.path("text").path("value"));
                 if (name == null || name.isEmpty()) {
-                    name = n.path("text").asText("");
+                    name = n.path("text").asText();
                 }
                 if (name == null || name.trim().isEmpty()) {
                     name = lfId;
@@ -164,11 +163,19 @@ public final class LogicFlowGraphConverter {
         }
 
         // ---- 边 ----
-        JsonNode edges = graph.path("edges");
+        JsonCursor edges = graph.path("edges");
         if (edges.isArray()) {
-            for (JsonNode e : edges) {
-                String src = e.path("source").path("id").asText(e.path("source").asText(null));
-                String tgt = e.path("target").path("id").asText(e.path("target").asText(null));
+            for (JsonCursor e : edges.elements()) {
+                JsonCursor source0 = e.path("source");
+                JsonCursor target0 = e.path("target");
+                String src = textOrNull(source0.path("id"));
+                if (src == null) {
+                    src = textOrNull(source0);
+                }
+                String tgt = textOrNull(target0.path("id"));
+                if (tgt == null) {
+                    tgt = textOrNull(target0);
+                }
                 if (src == null || tgt == null) {
                     continue;
                 }
@@ -182,7 +189,7 @@ public final class LogicFlowGraphConverter {
                 // 7.18 的 setter 叫 setSource/setTarget, 不是 setSourceRef/setTargetRef
                 flow.setSource(source);
                 flow.setTarget(target);
-                String label = e.path("text").path("value").asText("");
+                String label = e.path("text").path("value").asText();
                 if (label != null && !label.trim().isEmpty()) {
                     flow.setName(label);
                 }
@@ -238,7 +245,7 @@ public final class LogicFlowGraphConverter {
      * @return 创建好的元素; 类型未知时返回 null(由调用方跳过)
      */
     private static FlowNode createElement(BpmnModelInstance model, String type, String lfId,
-                                         String name, JsonNode node) {
+                                         String name, JsonCursor node) {
         switch (type) {
             case "start": {
                 StartEvent e = model.newInstance(StartEvent.class);
@@ -293,17 +300,17 @@ public final class LogicFlowGraphConverter {
      *
      * @return assignee 表达式; 无法静态确定时返回 null
      */
-    private static String resolveAssignee(JsonNode node) {
-        JsonNode props = node.path("properties");
-        String approverType = props.path("approverType").asText("");
-        JsonNode approver = props.path("approver");
+    private static String resolveAssignee(JsonCursor node) {
+        JsonCursor props = node.path("properties");
+        String approverType = props.path("approverType").asText();
+        JsonCursor approver = props.path("approver");
 
         if (!"specify_user".equals(approverType) || !approver.isArray() || approver.size() == 0) {
             return null;
         }
         StringBuilder sb = new StringBuilder();
-        for (Iterator<JsonNode> it = approver.elements(); it.hasNext(); ) {
-            String v = it.next().asText("");
+        for (JsonCursor item : approver.elements()) {
+            String v = item.asText();
             if (v == null || v.trim().isEmpty()) {
                 continue;
             }
@@ -316,6 +323,17 @@ public final class LogicFlowGraphConverter {
     }
 
     /**
+     * 取标量文本, 缺失或 JSON null 时返回 null。
+     *
+     * <p>对齐 Jackson {@code JsonNode.asText(String def)} 传 null 的语义:
+     * JsonCursor 的 {@code asText()} 在 missing 时返回空串, 直接用会把
+     * "没有这个字段" 和 "字段是空串" 混成一档。
+     */
+    private static String textOrNull(JsonCursor node) {
+        return (node.isMissing() || node.isNull()) ? null : node.asText();
+    }
+
+    /**
      * 图数据合法性自检, 供 Controller 在保存设计稿前先拦一道, 给出比 Camunda 部署期
      * 更早也更直白的错误。
      *
@@ -325,19 +343,19 @@ public final class LogicFlowGraphConverter {
         if (graphJson == null || graphJson.trim().isEmpty()) {
             return "流程图数据为空";
         }
-        JsonNode graph;
+        JsonCursor graph;
         try {
-            graph = MAPPER.readTree(graphJson);
+            graph = JsonCursor.of(JsonUtil.parse(graphJson));
         } catch (Exception e) {
             return "流程图数据不是合法 JSON: " + e.getMessage();
         }
-        JsonNode nodes = graph.path("nodes");
+        JsonCursor nodes = graph.path("nodes");
         if (!nodes.isArray() || nodes.size() == 0) {
             return "流程图没有节点";
         }
         boolean hasStart = false;
-        for (JsonNode n : nodes) {
-            if ("start".equals(n.path("type").asText(""))) {
+        for (JsonCursor n : nodes.elements()) {
+            if ("start".equals(n.path("type").asText())) {
                 hasStart = true;
                 break;
             }
@@ -355,29 +373,41 @@ public final class LogicFlowGraphConverter {
      * @return LogicFlow {nodes, edges} JSON
      */
     public static String newStarterGraph(String processKey) {
-        ObjectNode root = MAPPER.createObjectNode();
-        com.fasterxml.jackson.databind.node.ArrayNode nodes = root.putArray("nodes");
-        com.fasterxml.jackson.databind.node.ArrayNode edges = root.putArray("edges");
+        String startId = "start_" + processKey;
+        String endId = "end_" + processKey;
 
-        ObjectNode start = nodes.addObject();
-        start.put("id", "start_" + processKey);
-        start.put("type", "start");
-        ObjectNode startText = start.putObject("text");
+        Map<String, Object> startText = new LinkedHashMap<String, Object>();
         startText.put("value", "开始");
+        Map<String, Object> start = new LinkedHashMap<String, Object>();
+        start.put("id", startId);
+        start.put("type", "start");
+        start.put("text", startText);
 
-        ObjectNode end = nodes.addObject();
-        end.put("id", "end_" + processKey);
-        end.put("type", "end");
-        ObjectNode endText = end.putObject("text");
+        Map<String, Object> endText = new LinkedHashMap<String, Object>();
         endText.put("value", "结束");
+        Map<String, Object> end = new LinkedHashMap<String, Object>();
+        end.put("id", endId);
+        end.put("type", "end");
+        end.put("text", endText);
 
-        ObjectNode edge = edges.addObject();
+        Map<String, Object> source = new LinkedHashMap<String, Object>();
+        source.put("id", startId);
+        Map<String, Object> target = new LinkedHashMap<String, Object>();
+        target.put("id", endId);
+        Map<String, Object> edge = new LinkedHashMap<String, Object>();
         edge.put("id", "e_start_end");
-        ObjectNode source = edge.putObject("source");
-        source.put("id", start.get("id").asText());
-        ObjectNode target = edge.putObject("target");
-        target.put("id", end.get("id").asText());
+        edge.put("source", source);
+        edge.put("target", target);
 
-        return root.toString();
+        List<Object> nodes = new ArrayList<Object>();
+        nodes.add(start);
+        nodes.add(end);
+        List<Object> edges = new ArrayList<Object>();
+        edges.add(edge);
+
+        Map<String, Object> root = new LinkedHashMap<String, Object>();
+        root.put("nodes", nodes);
+        root.put("edges", edges);
+        return JsonUtil.toJson(root);
     }
 }

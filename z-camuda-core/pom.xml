@@ -54,6 +54,12 @@
             <artifactId>z-util-core</artifactId>
         </dependency>
 
+        <!-- 去 Jackson：JsonUtil / JsonCursor 所在的 z-util-parser-json，版本由根 pom 的
+             dependencyManagement 下发 -->
+        <dependency>
+            <groupId>io.github.yuku123</groupId>
+            <artifactId>z-util-parser-json</artifactId>
+        </dependency>
         <!-- log4j2 (SPI Registry 日志) -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
