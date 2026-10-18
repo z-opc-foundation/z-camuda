@@ -22,8 +22,12 @@ dependency-reduced-pom.xml
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
 
-# Frontend (should be in separate repo)
-_frontend/
+# Frontend
+# 域前端唯一真源就是本仓 _frontend/（lead 2026-10-08 定稿），所以只忽略构建产物，
+# 不能整目录忽略 —— 那会让新建的页面/入口文件对 git 隐身，提交时静默丢失。
+_frontend/**/node_modules/
+_frontend/**/dist/
+_frontend/**/.mvn-node/
 _frontend_component/
 node_modules/
 
