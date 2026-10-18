@@ -5,8 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Apex 员工 DTO — 蒸馏自 ace-platform-sdk {@code ApexStaffDTO}
- * （{@code com.c2f.ace.sdk.dto}），字段语义完全对齐.
+ * Apex 员工 DTO — 蒸馏自 ace-platform-sdk {@code ApexStaffDTO}，字段语义完全对齐.
  *
  * <p>业务方实现 {@link com.zifang.z.camuda.core.spi.CamudaApexListStaffService} 时，
  * 返回的人员列表元素.

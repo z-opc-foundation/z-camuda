@@ -75,7 +75,7 @@ import java.util.Map;
 
 /**
  * {name} — 蒸馏自 ace-platform-sdk {{@code {ace_name}}}
- * ({{@code com.c2f.ace.sdk}}，字段语义完全对齐.
+ * 字段语义完全对齐.
  *
  * <p>SPI 元信息（来自 ace {{@code @InterfaceMapping}}）:
  * <ul>

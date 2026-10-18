@@ -31,7 +31,7 @@ import java.util.Map;
  * 业务方实现这些接口即可在表单发起前/后、审批前/后注入自定义逻辑.
  *
  * <p>蒸馏自 ace-platform-core
- * {@code C2fOpsFormDataPreServiceImpl} + {@code AgreePreServiceImpl} 的 SPI 调度模式.
+ *  + {@code AgreePreServiceImpl} 的 SPI 调度模式.
  *
  * @author zifang
  * @since 1.0.0

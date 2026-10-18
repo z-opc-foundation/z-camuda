@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * z-camuda 流程 SPI 注册表 — 蒸馏自 ace-platform-core
- * {@code AcePlatformExtensionCollector} （{@code com.c2f.ace.core.extenssion.bdp.platform}}，
+ * {@code AcePlatformExtensionCollector} ，
  * 行为完全对齐.
  *
  * <p>启动时扫描 Spring 容器中所有实现 SPI 接口的 Bean，读取其 {@link CamudaSpi} 注解元信息，

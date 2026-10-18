@@ -7,8 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 审批校验服务 — 蒸馏自 ace-platform-sdk {@code AgreeValidateService}
- * ({@code com.c2f.ace.sdk}，字段语义完全对齐.
+ * 审批校验服务 — 蒸馏自 ace-platform-sdk {@code AgreeValidateService}，字段语义完全对齐.
  *
  * <p>SPI 元信息（来自 ace {@code @InterfaceMapping}）:
  * <ul>

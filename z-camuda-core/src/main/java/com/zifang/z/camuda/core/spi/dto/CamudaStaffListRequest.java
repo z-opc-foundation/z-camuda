@@ -4,8 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * 员工列表查询请求 — 蒸馏自 ace-platform-sdk {@code StaffListRequest}
- * （{@code com.c2f.ace.sdk.request}），字段语义完全对齐.
+ * 员工列表查询请求 — 蒸馏自 ace-platform-sdk {@code StaffListRequest}，字段语义完全对齐.
  *
  * @author zifang
  */

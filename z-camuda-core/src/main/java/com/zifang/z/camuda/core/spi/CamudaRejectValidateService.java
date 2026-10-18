@@ -7,8 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 拒绝校验服务 — 蒸馏自 ace-platform-sdk {@code RejectValidateService}
- * ({@code com.c2f.ace.sdk}，字段语义完全对齐.
+ * 拒绝校验服务 — 蒸馏自 ace-platform-sdk {@code RejectValidateService}，字段语义完全对齐.
  *
  * <p>SPI 元信息（来自 ace {@code @InterfaceMapping}）:
  * <ul>

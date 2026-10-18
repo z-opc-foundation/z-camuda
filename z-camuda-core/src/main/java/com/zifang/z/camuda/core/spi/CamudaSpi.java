@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 
 /**
  * z-camuda 流程 SPI 扩展点元信息注解 — 蒸馏自 ace-platform-sdk
- * {@code @InterfaceMapping} （{@code com.c2f.ace.sdk.annoation}），字段语义完全对齐.
+ * {@code @InterfaceMapping} ，字段语义完全对齐.
  *
  * <p>每个 SPI 接口实现类都应使用本注解标明：
  * <ul>

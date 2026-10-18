@@ -7,8 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 流程上下文坑位注册 — 蒸馏自 ace-platform-sdk {@code WorkflowContextKeyInjectService}
- * ({@code com.c2f.ace.sdk}，字段语义完全对齐.
+ * 流程上下文坑位注册 — 蒸馏自 ace-platform-sdk {@code WorkflowContextKeyInjectService}，字段语义完全对齐.
  *
  * <p>SPI 元信息（来自 ace {@code @InterfaceMapping}）:
  * <ul>

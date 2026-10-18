@@ -5,8 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * z-camuda 流程扩展上下文 — 蒸馏自 ace-platform-sdk {@code ExtensionServiceContext}
- * （{@code com.c2f.ace.sdk.dto}），字段语义完全对齐.
+ * z-camuda 流程扩展上下文 — 蒸馏自 ace-platform-sdk {@code ExtensionServiceContext}，字段语义完全对齐.
  *
  * <p>在 SPI 调用链中作为「业务上下文」参数传入 — 业务方实现 SPI 时可据此：
  * <ul>

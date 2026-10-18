@@ -3,8 +3,7 @@ package com.zifang.z.camuda.core.spi.dto;
 import java.io.Serializable;
 
 /**
- * Apex 部门 DTO — 蒸馏自 ace-platform-sdk {@code ApexDeptDTO}
- * （{@code com.c2f.ace.sdk.dto}），字段语义完全对齐.
+ * Apex 部门 DTO — 蒸馏自 ace-platform-sdk {@code ApexDeptDTO}，字段语义完全对齐.
  *
  * @author zifang
  */

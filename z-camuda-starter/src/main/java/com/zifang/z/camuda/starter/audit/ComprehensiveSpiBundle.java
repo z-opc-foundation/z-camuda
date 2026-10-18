@@ -248,7 +248,7 @@ public class ComprehensiveSpiBundle {
         }
     }
 
-    /** 表单查询前 — 对齐 ace C2fOpsFormQueryPreServiceImpl. */
+ /** 表单查询前 — 对齐 ace . */
     @Component
     @CamudaSpi(name = "综合-表单查询前", code = "FormDataQueryPreHandlerService", group = "表单", order = 50)
     public static class ComprehensiveQueryPre implements CamudaFormDataQueryPreHandlerService {

@@ -7,8 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 表单修改后处理 — 蒸馏自 ace-platform-sdk {@code FormDataModifyPostHandlerService}
- * ({@code com.c2f.ace.sdk}，字段语义完全对齐.
+ * 表单修改后处理 — 蒸馏自 ace-platform-sdk {@code FormDataModifyPostHandlerService}，字段语义完全对齐.
  *
  * <p>SPI 元信息（来自 ace {@code @InterfaceMapping}）:
  * <ul>

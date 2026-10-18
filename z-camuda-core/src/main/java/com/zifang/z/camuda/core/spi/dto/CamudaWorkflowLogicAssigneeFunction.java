@@ -3,8 +3,7 @@ package com.zifang.z.camuda.core.spi.dto;
 import java.io.Serializable;
 
 /**
- * 流程逻辑审批人函数定义 — 蒸馏自 ace-platform-sdk {@code WorkflowLogicAssigneeFunction}
- * （{@code com.c2f.ace.sdk.dto}），字段语义完全对齐.
+ * 流程逻辑审批人函数定义 — 蒸馏自 ace-platform-sdk {@code WorkflowLogicAssigneeFunction}，字段语义完全对齐.
  *
  * <p>业务方实现 {@link com.zifang.z.camuda.core.spi.CamudaWorkflowLogicAssigneeInjectService} 时，
  * 注册一个「逻辑审批人选取方式」到流程平台 — 流程引擎解析 BPMN 中的审批人占位符

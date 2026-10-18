@@ -17,7 +17,6 @@ import java.util.Map;
  * z-camuda 端到端测试用 SPI 示例 — 演示业务方如何在流程生命周期注入逻辑.
  *
  * <p>蒸馏自 ace-platform-core
- * {@code C2fOpsFormQueryPreServiceImpl} + {@code C2fOpsFormDataPreServiceImpl} +
  * {@code AgreePreServiceImpl} + {@code AgreePostServiceImpl} 的简化版，
  * 仅做日志埋点（业务流程各阶段打印上下文）用于演示 SPI 链路打通.
  *
