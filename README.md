@@ -302,10 +302,10 @@ JVM 参数经 `JVM_OPTS` 覆盖。
 - [`_doc/003_script/`](_doc/003_script/) — 运维与工具脚本（本仓 `_doc/` 目前唯一有内容的子目录）：
   - [`deploy_maven_center.sh`](_doc/003_script/deploy_maven_center.sh) — 编译并发布到 Maven Central（`publish` / `verify`）
   - [`install-settings.sh`](_doc/003_script/install-settings.sh) — 写入 Maven Central 凭证到 `~/.m2/settings.xml`（用 `CENTRAL_USERNAME` / `CENTRAL_TOKEN` 环境变量占位，不落明文）
-  - [`gen_wf_spi.py`](_doc/003_script/gen_wf_spi.py) — 批量生成器，把 ace-platform-sdk 的 22 个 SPI 接口蒸馏到 `z-camuda-core`
-  - [`wf-demo.sh`](_doc/003_script/wf-demo.sh) — 端到端演示脚本（健康检查 / 流程定义 / 启动请假流程）
+  - [`gen_camuda_spi.py`](_doc/003_script/gen_camuda_spi.py) — 批量生成器，把 ace-platform-sdk 的 22 个 SPI 接口蒸馏到 `z-camuda-core`
+  - [`camuda-demo.sh`](_doc/003_script/camuda-demo.sh) — 端到端演示脚本（健康检查 / 流程定义 / 启动请假流程）
 
-> `_doc/001_arch/`、`_doc/002_deploy/`、`_doc/004_skill/` 目前均为空目录，尚无归档文档；
+> 本仓 `_doc/` 目前只有 `003_script/` 与 `008_troubleshooting/` 两个桶有内容；`001_arch/` / `002_deploy/` / `004_skill/` 尚未建桶（空桶不建，见 lead 002 规范「桶按需建」）；
 > 架构与部署说明现内联在本 README 上文，脚本归 [`_doc/003_script/`](_doc/003_script/)。
 
 - `_doc/001_arch/` — 架构文档（目前为空目录，暂无内容）
