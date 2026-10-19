@@ -17,14 +17,14 @@ Starter，业务方引一条依赖即可嵌入自己的进程；独立部署时�
 | **仓库** | `z-camuda`（Workflow Engine） |
 | **Maven 坐标** | `io.github.yuku123:z-camuda:${revision}`（聚合 POM，`packaging=pom`） |
 | **当前版本** | `1.0.6`（根 POM `<revision>`，CI-friendly versions + `flatten-maven-plugin` `oss` 模式） |
-| **父项目** | `io.github.yuku123:z-boot-parent:1.0.21`（`<relativePath/>` 留空，parent 在 repo1 不在磁盘；1.0.19 起全组织统一走该 parent，本仓不再是自包含根 POM） |
+| **父项目** | `io.github.yuku123:z-boot-parent:1.1.0`（`<relativePath/>` 留空，parent 在 repo1 不在磁盘；1.0.19 起全组织统一走该 parent，本仓不再是自包含根 POM） |
 | **Maven Central** | 已发布：`z-camuda` / `z-camuda-core` / `z-camuda-web` / `z-camuda-starter` 的 `1.0.6` 均可从 repo1 拉取；`z-camuda-admin:1.0.6` 返回 404（设计上不发 Central） |
 | **默认端口** | `8080`（`SERVER_PORT`），`server.servlet.context-path` 默认 `/`（`SERVER_CONTEXT_PATH`）；`z-rpc` 端口默认 `20880` |
 | **运行口径** | Java 8 · Spring Boot 2.7.18（库模块经父链地板；`z-camuda-admin` 自带 `spring-boot-starter-parent` 钉 2.7.12） · Camunda BPM 7.18.0 |
 | **最近更新** | 2026-09-30 |
 
-> 版本口径由父链下发：第三方地板来自 `z-boot-dependencies`，兄弟仓（`z-config` / `z-rpc` / `z-util`）面值来自
-> `z-boot-fleet` 权威表。`camunda.version=7.18.0` 是本仓**刻意保留**的自有版本键（父链不供 `org.camunda.*`）。
+> 版本口径由父链下发：第三方地板与兄弟仓（`z-config` / `z-rpc` / `z-util`）权威表**都并进了 `z-boot-parent` 自身**
+> （`z-boot-dependencies` / `z-boot-fleet` 两个文件夹随 2026-10-08 火车制拓扑退役）。`camunda.version=7.18.0` 是本仓**刻意保留**的自有版本键（父链不供 `org.camunda.*`）。
 
 ---
 
@@ -56,9 +56,9 @@ Starter，业务方引一条依赖即可嵌入自己的进程；独立部署时�
 
 ```
 z-camuda/
-├── pom.xml                # 根聚合 POM：继承 z-boot-parent:1.0.21，<revision> 统一版本，camunda-bom 在本仓 import
+├── pom.xml                # 根聚合 POM：继承 z-boot-parent:1.1.0，<revision> 统一版本，camunda-bom 在本仓 import
 ├── z-camuda-core/             # Camunda 封装 + 3 个钩子接口 + 22 个 SPI 扩展接口 + @CamudaSpi + CamudaSpiRegistry + LeaveProcessService
-├── z-camuda-web/              # REST API：6 个 Controller + DTO/VO（依赖 core、z-util-core、swagger-annotations provided）
+├── z-camuda-web/              # REST API：7 个 Controller（Group/ApprovalCenter/TaskOperation/ProcessOperation/ProcessModel/LeaveProcess/CamudaBaseHealth）+ DTO/VO（依赖 core、z-util-core、swagger-annotations provided）
 ├── z-camuda-starter/          # 自动装配 + z-config/z-rpc 可选集成 + RPC 暴露 + audit SPI 夹具 + 示例流程
 │   └── src/main/resources/
 │       ├── META-INF/spring.factories          # 指向 CamudaStarterAutoConfiguration
@@ -90,9 +90,9 @@ z-camuda/
 | 层级 | 技术 |
 |------|------|
 | 语言 / 运行时 | Java 8（父链 `pluginManagement` 下发 source/target 8 + `-parameters`，class-file major 52） |
-| 框架 | Spring Boot 2.7.18（库模块由 `z-boot-dependencies` 地板供）；`z-camuda-admin` 自带 parent `spring-boot-starter-parent:2.7.12` |
+| 框架 | Spring Boot 2.7.18（库模块由 `z-boot-parent` 自带地板供）；`z-camuda-admin` 自带 parent `spring-boot-starter-parent:2.7.12` |
 | 工作流引擎 | Camunda BPM `7.18.0`（`camunda-bpm-spring-boot-starter` + `camunda-bom` import，版本键留本仓） |
-| 通用类型 | `z-util-core`（`Result` / `PageResult` / `StatusCode`），版本随 `z-boot-fleet` 权威表 |
+| 通用类型 | `z-util-core`（`Result` / `PageResult` / `StatusCode`），版本随 `z-boot-parent` 的兄弟仓权威表 |
 | 数据库 | 生产 MySQL 8（`mysql-connector-java 8.0.33` 旧坐标）+ Druid `1.2.18`（admin）；H2（`h2-test` profile） |
 | 日志 | log4j2（`log4j-api`/`core` 走地板 2.25.4；`log4j-slf4j2-impl 2.26.1` 本仓留格） |
 | 接口文档 | Knife4j / OpenAPI3（`knife4j-openapi3-spring-boot-starter 4.1.0` 在 admin；`swagger-annotations 2.2.8` 在 web，provided） |
@@ -110,8 +110,8 @@ z-camuda/
 mvn clean install -DskipTests
 ```
 
-第三方与兄弟仓版本由 `z-boot-parent` → `z-boot-dependencies`（地板）+ `z-boot-fleet`（权威表）供给，
-模块 POM 不再出现字面版本钉；若构建报找不到版本，先确认能解析到 `io.github.yuku123:z-boot-parent:1.0.21`。
+第三方与兄弟仓版本由 `z-boot-parent:1.1.0` 供给（第三方地板与兄弟仓权威表均已并入 parent 自身），
+模块 POM 不再出现字面版本钉；若构建报找不到版本，先确认能解析到 `io.github.yuku123:z-boot-parent:1.1.0`。
 
 ### 作为依赖嵌入业务方（Starter）
 
@@ -299,17 +299,20 @@ JVM 参数经 `JVM_OPTS` 覆盖。
 
 本项目文档统一收口在 `_doc/` 下：
 
-- [`_doc/003_script/`](_doc/003_script/) — 运维与工具脚本（本仓 `_doc/` 目前唯一有内容的子目录）：
+- [`_doc/001_arch/`](_doc/001_arch/) — 架构文档：
+  - [`00-overview.md`](_doc/001_arch/00-overview.md) — 项目总览：4 个模块的职责边界、7 个 REST Controller 与路径前缀、
+    3 个生命周期钩子、22 个 SPI 接口与「只有 4 个接了派发点」的账、starter 自动装配与 z-config/z-rpc 可选集成、
+    部署形态与源码包树
+- [`_doc/003_script/`](_doc/003_script/) — 运维与工具脚本：
   - [`deploy_maven_center.sh`](_doc/003_script/deploy_maven_center.sh) — 编译并发布到 Maven Central（`publish` / `verify`）
   - [`install-settings.sh`](_doc/003_script/install-settings.sh) — 写入 Maven Central 凭证到 `~/.m2/settings.xml`（用 `CENTRAL_USERNAME` / `CENTRAL_TOKEN` 环境变量占位，不落明文）
   - [`gen_camuda_spi.py`](_doc/003_script/gen_camuda_spi.py) — 批量生成器，把 ace-platform-sdk 的 22 个 SPI 接口蒸馏到 `z-camuda-core`
   - [`camuda-demo.sh`](_doc/003_script/camuda-demo.sh) — 端到端演示脚本（健康检查 / 流程定义 / 启动请假流程）
+  - [`verify_central.sh`](_doc/003_script/verify_central.sh) — 对真实 Maven Central 校验发布件
+  - [`verify-classes.txt`](_doc/003_script/verify-classes.txt) · [`verify-exclude.txt`](_doc/003_script/verify-exclude.txt) — 校验清单
 
-> 本仓 `_doc/` 目前只有 `003_script/` 与 `008_troubleshooting/` 两个桶有内容；`001_arch/` / `002_deploy/` / `004_skill/` 尚未建桶（空桶不建，见 lead 002 规范「桶按需建」）；
-> 架构与部署说明现内联在本 README 上文，脚本归 [`_doc/003_script/`](_doc/003_script/)。
-
-- `_doc/001_arch/` — 架构文档（目前为空目录，暂无内容）
-- `_doc/002_deploy/` — 部署 SQL（目前为空目录，建表由 Camunda `schema-update` 与脚本自理）
-- `_doc/004_skill/` — AI skill 定义（目前为空目录，暂无 skill）
+> 本仓 `_doc/` 目前只有 `001_arch/` 与 `003_script/` 两个桶有内容；`002_deploy/` / `004_skill/` /
+> `006_release` / `007_backlog` / `008_troubleshooting` 尚未建桶（空桶不建，见 lead 002 规范「桶按需建」）；
+> 部署说明现内联在本 README 上文（含 Dockerfile 与 compose 的三服务编排），架构总览见 [`_doc/001_arch/`](_doc/001_arch/)。
 
 _Maintained by the z-opc-foundation organization._
