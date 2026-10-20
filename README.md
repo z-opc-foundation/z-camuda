@@ -157,6 +157,7 @@ Z_RPC_ENABLED=true Z_RPC_SERVER_PORT=20880 \
 | 路径前缀 | Controller | 关键端点 |
 |----------|------------|----------|
 | `/api/approval-center` | `ApprovalCenterController` | `GET /dashboard`、`GET /tasks/todo`、`GET /tasks/done`、`GET /tasks/get`、`POST /tasks/complete`、`GET /my-processes`、`GET /processes/get`、`POST /processes/start`、`GET /processes/definitions`、`GET /processes/search`、`GET /processes/versions`、`POST /processes/definitions/suspend`、`POST /processes/definitions/activate`、`DELETE /processes` |
+| `/api/approval-center/processes/model` | `ProcessModelController` | `GET /graph`、`POST /graph`、`POST /deploy`、`GET /keys` |
 | `/api/wf/process` | `ProcessOperationController` | `POST /suspend`、`POST /activate`、`POST /comment`、`GET /comments`、`GET /trail`、`GET /overview` |
 | `/api/wf/task` | `TaskOperationController` | `POST /transfer`、`POST /delegate`、`POST /claim`、`POST /withdraw`、`POST /jump`、`POST /force-complete` |
 | `/api/wf/group` | `GroupController` | `GET /list`、`POST /set`、`GET /processes`、`DELETE` |
