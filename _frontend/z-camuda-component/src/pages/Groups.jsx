@@ -1,7 +1,8 @@
 /** Camunda 分组：/api/wf/group list + processes + set。 */
 import {useEffect, useState} from 'react'
-import {Alert, Button, Card, Form, Input, Modal, Space, Table, Tabs, Typography, message} from 'antd'
+import {Button, Card, Form, Input, Modal, Space, Table, Tabs, Typography, message} from 'antd'
 import {PlusOutlined, ReloadOutlined} from '@ant-design/icons'
+import {EmptyState, ErrorState, TableToolbar} from '@yuku123/z-frontend-common/ui'
 import {camudaApi} from '../services/api'
 
 const {Title, Paragraph} = Typography
@@ -26,7 +27,8 @@ function GroupTable({rows, loading, onSet}) {
         },
     ]
     return <Table rowKey={(r, i) => r.id || i} dataSource={rows} columns={columns}
-                  loading={loading && !rows.length} size="small" pagination={{pageSize: 10}}/>
+                  loading={loading && !rows.length} size="small" pagination={{pageSize: 10}}
+                  locale={{emptyText: <EmptyState title="暂无数据" description="接口返回空列表" size="sm"/>}}/>
 }
 
 export default function Groups() {
@@ -74,13 +76,19 @@ export default function Groups() {
 
     return (
         <div>
-            <Space style={{marginBottom: 16}}>
-                <Title level={4} style={{margin: 0}}>引擎分组</Title>
-                <Button icon={<ReloadOutlined/>} onClick={fetchAll} loading={loading}>刷新</Button>
-            </Space>
+            <TableToolbar
+                left={<Title level={4} style={{margin: 0}}>引擎分组</Title>}
+                right={
+                    <Button icon={<ReloadOutlined/>} onClick={fetchAll} loading={loading}>刷新</Button>
+                }
+            />
             <Paragraph type="secondary">/api/wf/group/list · /api/wf/group/processes · set 绑定。</Paragraph>
 
-            {error && <Alert type="error" showIcon style={{marginBottom: 16}} message="后端未连接" description={error}/>}
+            {error && (
+                <div style={{marginBottom: 16}}>
+                    <ErrorState error={error} title="后端未连接" onRetry={() => fetchAll()}/>
+                </div>
+            )}
 
             <Card>
                 <Tabs items={[

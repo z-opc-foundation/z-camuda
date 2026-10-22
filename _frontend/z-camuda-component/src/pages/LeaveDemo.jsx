@@ -1,7 +1,8 @@
 /** 请假演示流程：/api/leave start + todo/complete。 */
 import {useEffect, useState} from 'react'
-import {Alert, Button, Card, Col, Form, Input, Row, Space, Table, Tag, Typography, message} from 'antd'
+import {Button, Card, Col, Form, Input, Row, Space, Table, Tag, Typography, message} from 'antd'
 import {ReloadOutlined, SendOutlined} from '@ant-design/icons'
+import {EmptyState, ErrorState, TableToolbar} from '@yuku123/z-frontend-common/ui'
 import {camudaApi} from '../services/api'
 
 const {Title, Paragraph} = Typography
@@ -75,15 +76,25 @@ export default function LeaveDemo() {
 
     return (
         <div>
-            <Space style={{marginBottom: 16}} wrap>
-                <Title level={4} style={{margin: 0}}>请假流程演示</Title>
-                <Input value={approver} onChange={(e) => setApprover(e.target.value)} style={{width: 160}}
-                       placeholder="审批人" addonBefore="审批人"/>
-                <Button icon={<ReloadOutlined/>} onClick={() => fetchTodo()} loading={loading}>刷新</Button>
-            </Space>
+            <TableToolbar
+                left={
+                    <>
+                        <Title level={4} style={{margin: 0}}>请假流程演示</Title>
+                        <Input value={approver} onChange={(e) => setApprover(e.target.value)} style={{width: 160}}
+                               placeholder="审批人" addonBefore="审批人"/>
+                    </>
+                }
+                right={
+                    <Button icon={<ReloadOutlined/>} onClick={() => fetchTodo()} loading={loading}>刷新</Button>
+                }
+            />
             <Paragraph type="secondary">/api/leave/start 发起 · /api/leave/getApprovalTasks 待审 · /api/leave/complete 审批。</Paragraph>
 
-            {error && <Alert type="error" showIcon style={{marginBottom: 16}} message="后端未连接" description={error}/>}
+            {error && (
+                <div style={{marginBottom: 16}}>
+                    <ErrorState error={error} title="后端未连接" onRetry={() => fetchTodo()}/>
+                </div>
+            )}
 
             <Row gutter={16}>
                 <Col span={8}>
@@ -102,7 +113,8 @@ export default function LeaveDemo() {
                 <Col span={16}>
                     <Card title={`待审批任务（审批人：${approver || '—'}）`}>
                         <Table rowKey={(r, i) => r.id || r.taskId || i} dataSource={rows} columns={columns}
-                               loading={loading && !rows.length} size="small" pagination={{pageSize: 10}}/>
+                               loading={loading && !rows.length} size="small" pagination={{pageSize: 10}}
+                               locale={{emptyText: <EmptyState title="暂无待审批任务" description="发起一个请假流程后，待审批的任务会出现在这里" size="sm"/>}}/>
                     </Card>
                 </Col>
             </Row>
