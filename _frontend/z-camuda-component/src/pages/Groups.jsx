@@ -1,8 +1,8 @@
 /** Camunda 分组：/api/wf/group list + processes + set。 */
 import {useEffect, useState} from 'react'
-import {Button, Card, Form, Input, Modal, Space, Table, Tabs, Typography, message} from 'antd'
+import {Button, Form, Input, Modal, Space, Tabs, Typography, message} from 'antd'
 import {PlusOutlined, ReloadOutlined} from '@ant-design/icons'
-import {EmptyState, ErrorState, TableToolbar} from '@yuku123/z-frontend-common/ui'
+import {ErrorState, ListTable, TableToolbar} from '@yuku123/z-frontend-common/ui'
 import {camudaApi} from '../services/api'
 
 const {Title, Paragraph} = Typography
@@ -26,9 +26,14 @@ function GroupTable({rows, loading, onSet}) {
             render: (_, r) => <Button size="small" onClick={() => onSet(r)}>设置</Button>,
         },
     ]
-    return <Table rowKey={(r, i) => r.id || i} dataSource={rows} columns={columns}
-                  loading={loading && !rows.length} size="small" pagination={{pageSize: 10}}
-                  locale={{emptyText: <EmptyState title="暂无数据" description="接口返回空列表" size="sm"/>}}/>
+    // 整表在前端 ⇒ 走基座 ListTable：分页/查询/空态三件套由基座统一承接。
+    // 列是按后端返回的字段动态生成的，所以过滤字段也跟着列走（没数据时 searchKeys 为空 ⇒ 不渲染过滤框）。
+    return <ListTable rows={rows} columns={columns} rowKey={(r, i) => r.id || i}
+                      loading={loading && !rows.length}
+                      searchKeys={dataColumns.map((c) => c.dataIndex).join(',')}
+                      searchPlaceholder="按列表字段过滤"
+                      emptyTitle="暂无数据"
+                      emptyDescription="接口返回空列表"/>
 }
 
 export default function Groups() {
@@ -90,12 +95,12 @@ export default function Groups() {
                 </div>
             )}
 
-            <Card>
-                <Tabs items={[
-                    {key: 'groups', label: '分组清单', children: <GroupTable rows={groups} loading={loading} onSet={openSet}/>},
-                    {key: 'processes', label: '流程清单', children: <GroupTable rows={processes} loading={loading} onSet={openSet}/>},
-                ]}/>
-            </Card>
+            {/* 外面这层 Card 删掉：基座 ListTable 自带 Card，
+                留着就是 Card 套 Card（双层边框 + 双层内边距）。 */}
+            <Tabs items={[
+                {key: 'groups', label: '分组清单', children: <GroupTable rows={groups} loading={loading} onSet={openSet}/>},
+                {key: 'processes', label: '流程清单', children: <GroupTable rows={processes} loading={loading} onSet={openSet}/>},
+            ]}/>
 
             <Modal title={`设置 ${editing?.id ?? ''}`} open={!!editing} onOk={submitSet}
                    onCancel={() => setEditing(null)} destroyOnClose>

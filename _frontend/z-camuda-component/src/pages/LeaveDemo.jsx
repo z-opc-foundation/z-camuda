@@ -1,8 +1,8 @@
 /** 请假演示流程：/api/leave start + todo/complete。 */
 import {useEffect, useState} from 'react'
-import {Button, Card, Col, Form, Input, Row, Space, Table, Tag, Typography, message} from 'antd'
+import {Button, Card, Col, Form, Input, Row, Space, Tag, Typography, message} from 'antd'
 import {ReloadOutlined, SendOutlined} from '@ant-design/icons'
-import {EmptyState, ErrorState, TableToolbar} from '@yuku123/z-frontend-common/ui'
+import {ErrorState, ListTable, TableToolbar} from '@yuku123/z-frontend-common/ui'
 import {camudaApi} from '../services/api'
 
 const {Title, Paragraph} = Typography
@@ -111,11 +111,20 @@ export default function LeaveDemo() {
                     </Card>
                 </Col>
                 <Col span={16}>
-                    <Card title={`待审批任务（审批人：${approver || '—'}）`}>
-                        <Table rowKey={(r, i) => r.id || r.taskId || i} dataSource={rows} columns={columns}
-                               loading={loading && !rows.length} size="small" pagination={{pageSize: 10}}
-                               locale={{emptyText: <EmptyState title="暂无待审批任务" description="发起一个请假流程后，待审批的任务会出现在这里" size="sm"/>}}/>
-                    </Card>
+                    {/* 待审批任务是「整表在前端」的形态 ⇒ 走基座 ListTable：
+                        分页/查询/空态三件套由基座统一承接。
+                        列是按后端返回的字段动态生成的，所以过滤字段也跟着列走。 */}
+                    <ListTable
+                        cardTitle={`待审批任务（审批人：${approver || '—'}）`}
+                        rows={rows}
+                        columns={columns}
+                        rowKey={(r, i) => r.id || r.taskId || i}
+                        loading={loading && !rows.length}
+                        searchKeys={dataColumns.map((c) => c.dataIndex).join(',')}
+                        searchPlaceholder="按列表字段过滤"
+                        emptyTitle="暂无待审批任务"
+                        emptyDescription="发起一个请假流程后，待审批的任务会出现在这里"
+                    />
                 </Col>
             </Row>
         </div>
