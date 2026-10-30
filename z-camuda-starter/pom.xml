@@ -13,7 +13,7 @@
     <groupId>io.github.yuku123</groupId>
 
     <artifactId>z-camuda-starter</artifactId>
-    <name>z-camuda-starter</name>
+    <name>z-camuda :: starter</name>
     <description>工作流引擎 Spring Boot Starter — 自动装配 Camunda 引擎 + 审批中心 REST + 可选 z-config/z-rpc 集成 (可运行应用见 z-camuda-admin)</description>
     <url>https://github.com/yuku123/z-opc-foundation/tree/main/z-camuda/z-camuda-starter</url>
     <licenses>

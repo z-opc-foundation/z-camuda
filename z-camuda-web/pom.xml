@@ -13,7 +13,7 @@
     <groupId>io.github.yuku123</groupId>
 
     <artifactId>z-camuda-web</artifactId>
-    <name>z-camuda-web</name>
+    <name>z-camuda :: web</name>
     <description>工作流引擎 Web 模块 — REST API + 审批中心</description>
     <url>https://github.com/yuku123/z-opc-foundation/tree/main/z-camuda/z-camuda-web</url>
     <licenses>

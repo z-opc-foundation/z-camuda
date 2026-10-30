@@ -23,8 +23,8 @@
     <artifactId>z-camuda-admin</artifactId>
     <version>1.0.6</version>
     <packaging>jar</packaging>
-    <name>z-camuda :: admin (Standalone App, NOT published to Central)</name>
-    <description>z-camuda 独立可启动应用 — Camunda 引擎 + 审批中心 REST + 自带管理前端. 不发 Maven Central.</description>
+    <name>z-camuda :: admin</name>
+    <description>z-camuda 独立可启动应用 — Camunda 引擎 + 审批中心 REST + 自带管理前端. 不发 Maven Central. / Standalone App, NOT published to Central</description>
 
     <properties>
         <!-- 与 ../pom.xml <revision> 同步 -->

@@ -24,8 +24,8 @@
     <version>${revision}</version>
     <packaging>pom</packaging>
 
-    <name>z-camuda (Workflow Engine)</name>
-    <description>基于 Camunda 的工作流引擎, 支持流程定义、任务管理、审批中心。提供钩子接口供业务方扩展。</description>
+    <name>z-camuda :: root</name>
+    <description>基于 Camunda 的工作流引擎, 支持流程定义、任务管理、审批中心。提供钩子接口供业务方扩展。 / Workflow Engine</description>
 
     <url>https://github.com/yuku123/z-opc-foundation</url>
 

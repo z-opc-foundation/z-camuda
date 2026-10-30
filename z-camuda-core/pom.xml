@@ -13,7 +13,7 @@
     <groupId>io.github.yuku123</groupId>
 
     <artifactId>z-camuda-core</artifactId>
-    <name>z-camuda-core</name>
+    <name>z-camuda :: core</name>
     <description>工作流引擎核心模块 — Camunda 封装 + 钩子接口</description>
     <url>https://github.com/yuku123/z-opc-foundation/tree/main/z-camuda/z-camuda-core</url>
     <licenses>
