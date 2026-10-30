@@ -17,10 +17,10 @@ Starter，业务方引一条依赖即可嵌入自己的进程；独立部署时�
 | **仓库** | `z-camuda`（Workflow Engine） |
 | **Maven 坐标** | `io.github.yuku123:z-camuda:${revision}`（聚合 POM，`packaging=pom`） |
 | **当前版本** | `1.0.6`（根 POM `<revision>`，CI-friendly versions + `flatten-maven-plugin` `oss` 模式） |
-| **父项目** | `io.github.yuku123:z-boot-parent:1.1.0`（`<relativePath/>` 留空，parent 在 repo1 不在磁盘；1.0.19 起全组织统一走该 parent，本仓不再是自包含根 POM） |
+| **父项目** | `io.github.yuku123:z-boot-parent:1.2.0`（`<relativePath/>` 留空，parent 在 repo1 不在磁盘；1.0.19 起全组织统一走该 parent，本仓不再是自包含根 POM） |
 | **Maven Central** | 已发布：`z-camuda` / `z-camuda-core` / `z-camuda-web` / `z-camuda-starter` 的 `1.0.6` 均可从 repo1 拉取；`z-camuda-admin:1.0.6` 返回 404（设计上不发 Central） |
 | **默认端口** | `8080`（`SERVER_PORT`），`server.servlet.context-path` 默认 `/`（`SERVER_CONTEXT_PATH`）；`z-rpc` 端口默认 `20880` |
-| **运行口径** | Java 8 · Spring Boot 2.7.18（库模块经父链地板；`z-camuda-admin` 自带 `spring-boot-starter-parent` 钉 2.7.12） · Camunda BPM 7.18.0 |
+| **运行口径** | Java 17 · Spring Boot 3.3.13（库模块经父链地板；`z-camuda-admin` 自带 `spring-boot-starter-parent` 钉 2.7.12） · Camunda BPM 7.18.0 |
 | **最近更新** | 2026-09-30 |
 
 > 版本口径由父链下发：第三方地板与兄弟仓（`z-config` / `z-rpc` / `z-util`）权威表**都并进了 `z-boot-parent` 自身**
@@ -56,7 +56,7 @@ Starter，业务方引一条依赖即可嵌入自己的进程；独立部署时�
 
 ```
 z-camuda/
-├── pom.xml                # 根聚合 POM：继承 z-boot-parent:1.1.0，<revision> 统一版本，camunda-bom 在本仓 import
+├── pom.xml                # 根聚合 POM：继承 z-boot-parent:1.2.0，<revision> 统一版本，camunda-bom 在本仓 import
 ├── z-camuda-core/             # Camunda 封装 + 3 个钩子接口 + 22 个 SPI 扩展接口 + @CamudaSpi + CamudaSpiRegistry + LeaveProcessService
 ├── z-camuda-web/              # REST API：7 个 Controller（Group/ApprovalCenter/TaskOperation/ProcessOperation/ProcessModel/LeaveProcess/CamudaBaseHealth）+ DTO/VO（依赖 core、z-util-core、swagger-annotations provided）
 ├── z-camuda-starter/          # 自动装配 + z-config/z-rpc 可选集成 + RPC 暴露 + audit SPI 夹具 + 示例流程
@@ -89,7 +89,7 @@ z-camuda/
 
 | 层级 | 技术 |
 |------|------|
-| 语言 / 运行时 | Java 8（父链 `pluginManagement` 下发 source/target 8 + `-parameters`，class-file major 52） |
+| 语言 / 运行时 | Java 17（父链 `pluginManagement` 下发 source/target 8 + `-parameters`，class-file major 61） |
 | 框架 | Spring Boot 2.7.18（库模块由 `z-boot-parent` 自带地板供）；`z-camuda-admin` 自带 parent `spring-boot-starter-parent:2.7.12` |
 | 工作流引擎 | Camunda BPM `7.18.0`（`camunda-bpm-spring-boot-starter` + `camunda-bom` import，版本键留本仓） |
 | 通用类型 | `z-util-core`（`Result` / `PageResult` / `StatusCode`），版本随 `z-boot-parent` 的兄弟仓权威表 |
@@ -110,8 +110,8 @@ z-camuda/
 mvn clean install -DskipTests
 ```
 
-第三方与兄弟仓版本由 `z-boot-parent:1.1.0` 供给（第三方地板与兄弟仓权威表均已并入 parent 自身），
-模块 POM 不再出现字面版本钉；若构建报找不到版本，先确认能解析到 `io.github.yuku123:z-boot-parent:1.1.0`。
+第三方与兄弟仓版本由 `z-boot-parent:1.2.0` 供给（第三方地板与兄弟仓权威表均已并入 parent 自身），
+模块 POM 不再出现字面版本钉；若构建报找不到版本，先确认能解析到 `io.github.yuku123:z-boot-parent:1.2.0`。
 
 ### 作为依赖嵌入业务方（Starter）
 

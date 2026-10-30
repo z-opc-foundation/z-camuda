@@ -15,7 +15,7 @@
     <parent>
         <groupId>io.github.yuku123</groupId>
         <artifactId>z-boot-parent</artifactId>
-        <version>1.1.0</version>
+        <version>1.2.0</version>
         <relativePath/>
     </parent>
 
@@ -79,7 +79,7 @@
              camunda-bom 那条 import 必须留在这里，删键当场悬空（preflight 第 5 节点名了它）。
              注意坑 5：`import` 进来的 BOM 顶不过从 parent 继承来的**直接** DM 条目——camunda 那一族父链
              一条都不管，所以这一格今天不会和父链打架；将来地板若开始管 camunda，得改写成逐坐标的直接条目。 -->
-        <camunda.version>7.18.0</camunda.version>
+        <camunda.version>7.21.0</camunda.version>
     </properties>
 
     <dependencyManagement>

@@ -10,10 +10,12 @@
         <version> 与依赖的 z-camuda-starter 版本必须与 ../pom.xml 的 <revision> 保持一致.
         本地启动: mvn spring-boot:run  (端口/context-path 见 application.properties)
     -->
+    <!-- 2026-10-30 SB3 火车：own-parent 从 spring-boot-starter-parent 2.7.12 reparent 到 z-boot-parent 1.2.0
+         （DM 早已 import 1.2.0，这里只是把 parent 链也拉齐 —— 悬留清零） -->
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.12</version>
+        <groupId>io.github.yuku123</groupId>
+        <artifactId>z-boot-parent</artifactId>
+        <version>1.2.0</version>
         <relativePath/>
     </parent>
 
@@ -31,7 +33,7 @@
              2026-09-29 消费者轮抬到 1.0.1（= z-boot-parent:1.0.21 import 的那一份）：
              停在 1.0.0 会让本模块 import 的兄弟仓面值落后一整批。 -->
         <maven.deploy.skip>true</maven.deploy.skip>
-        <java.version>8</java.version>
+        <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -45,7 +47,7 @@
             <dependency>
                 <groupId>io.github.yuku123</groupId>
                 <artifactId>z-boot-parent</artifactId>
-                <version>1.1.0</version>
+                <version>1.2.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -84,7 +86,7 @@
         <!-- Druid 连接池 -->
         <dependency>
             <groupId>com.alibaba</groupId>
-            <artifactId>druid-spring-boot-starter</artifactId>
+            <artifactId>druid-spring-boot-3-starter</artifactId>
             <version>1.2.18</version>
         </dependency>
 
@@ -95,11 +97,7 @@
         </dependency>
 
         <!-- Knife4j API 文档 (doc.html) -->
-        <dependency>
-            <groupId>com.github.xiaoymin</groupId>
-            <artifactId>knife4j-openapi3-spring-boot-starter</artifactId>
-            <version>4.1.0</version>
-        </dependency>
+        <!-- 2026-10-30 SB3 火车：本模块 parent 仍是 spring-boot-starter-parent 2.7.12（迁移悬留），knife4j-jakarta 栈不相容 —— 摘除，随 reparent 火车恢复 -->
 
         <!-- 日志: log4j2 替换默认 logback -->
         <dependency>

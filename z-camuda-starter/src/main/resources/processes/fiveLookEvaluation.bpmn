@@ -10,7 +10,7 @@
   id="Definitions_5look"
   targetNamespace="http://camunda.org/examples">
 
-  <process id="fiveLookEvaluation" name="五看评估流程" isExecutable="true">
+  <process id="fiveLookEvaluation" name="五看评估流程" isExecutable="true" camunda:historyTimeToLive="180">
 
     <!-- 开始：CEO/agent 提交一个 opportunity 进入评估 -->
     <startEvent id="startEvent" name="发现新机会" camunda:initiator="analyst">

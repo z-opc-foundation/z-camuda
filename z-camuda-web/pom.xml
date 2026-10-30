@@ -69,12 +69,6 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- Lombok -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
     </dependencies>
 
     <!-- maven-compiler-plugin 这条"只为继承配置"的声明删掉，口径由父链 pluginManagement 下发

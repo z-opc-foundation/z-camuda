@@ -11,7 +11,7 @@
   targetNamespace="http://camunda.org/examples">
 
   <!-- 流程核心逻辑 -->
-  <process id="leaveProcess" name="员工请假流程" isExecutable="true">
+  <process id="leaveProcess" name="员工请假流程" isExecutable="true" camunda:historyTimeToLive="180">
     <!-- 开始事件：绑定申请人变量，包含请假天数/原因表单 -->
     <startEvent id="startEvent" name="开始请假" camunda:initiator="applicant">
       <extensionElements>
