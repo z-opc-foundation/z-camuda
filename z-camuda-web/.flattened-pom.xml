@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.yuku123</groupId>
   <artifactId>z-camuda-web</artifactId>
-  <version>1.0.6</version>
+  <version>1.0.7</version>
   <name>z-camuda :: web</name>
   <description>工作流引擎 Web 模块 — REST API + 审批中心</description>
   <url>https://github.com/yuku123/z-opc-foundation/tree/main/z-camuda/z-camuda-web</url>
@@ -30,7 +30,7 @@
     <dependency>
       <groupId>io.github.yuku123</groupId>
       <artifactId>z-camuda-core</artifactId>
-      <version>1.0.6</version>
+      <version>1.0.7</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
