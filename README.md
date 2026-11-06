@@ -16,9 +16,9 @@ Starter，业务方引一条依赖即可嵌入自己的进程；独立部署时�
 |------|-----|
 | **仓库** | `z-camuda`（Workflow Engine） |
 | **Maven 坐标** | `io.github.yuku123:z-camuda:${revision}`（聚合 POM，`packaging=pom`） |
-| **当前版本** | `1.0.6`（根 POM `<revision>`，CI-friendly versions + `flatten-maven-plugin` `oss` 模式） |
+| **当前版本** | `1.0.7`（根 POM `<revision>`，CI-friendly versions + `flatten-maven-plugin` `oss` 模式） |
 | **父项目** | `io.github.yuku123:z-boot-parent:1.2.2`（`<relativePath/>` 留空，parent 在 repo1 不在磁盘；1.0.19 起全组织统一走该 parent，本仓不再是自包含根 POM） |
-| **Maven Central** | 已发布：`z-camuda` / `z-camuda-core` / `z-camuda-web` / `z-camuda-starter` 的 `1.0.6` 均可从 repo1 拉取；`z-camuda-admin:1.0.6` 返回 404（设计上不发 Central） |
+| **Maven Central** | 已发布：`z-camuda` / `z-camuda-core` / `z-camuda-web` / `z-camuda-starter` 的 `1.0.7` 均可从 repo1 拉取；`z-camuda-admin:1.0.7` 返回 404（设计上不发 Central） |
 | **默认端口** | `8080`（`SERVER_PORT`），`server.servlet.context-path` 默认 `/`（`SERVER_CONTEXT_PATH`）；`z-rpc` 端口默认 `20880` |
 | **运行口径** | Java 17 · Spring Boot 3.3.13（库模块经父链地板；`z-camuda-admin` 自带 `spring-boot-starter-parent` 钉 2.7.12） · Camunda BPM 7.18.0 |
 | **最近更新** | 2026-09-30 |
@@ -119,7 +119,7 @@ mvn clean install -DskipTests
 <dependency>
     <groupId>io.github.yuku123</groupId>
     <artifactId>z-camuda-starter</artifactId>
-    <version>1.0.6</version>
+    <version>1.0.7</version>
 </dependency>
 ```
 
@@ -131,7 +131,7 @@ Controller、Camunda 引擎装配与 SPI 注册表；`z-config` / `z-rpc` 集成
 ```bash
 # 1) 无外部依赖（H2 内存库，关闭 z-config/z-rpc）——最快看到 /doc.html 与管理前端
 mvn -pl z-camuda-admin -am package -DskipTests
-java -jar z-camuda-admin/target/z-camuda-admin-1.0.6-exec.jar --spring.profiles.active=h2-test
+java -jar z-camuda-admin/target/z-camuda-admin-1.0.7-exec.jar --spring.profiles.active=h2-test
 
 # 2) 连真实 MySQL：所有凭据一律经环境变量注入，禁止写进 yml/jar/镜像层
 SERVER_PORT=8080 \
@@ -140,7 +140,7 @@ SPRING_DATASOURCE_USERNAME=*** SPRING_DATASOURCE_PASSWORD=*** \
 CAMUNDA_ADMIN_USER=*** CAMUNDA_ADMIN_PASSWORD=*** \
 Z_CONFIG_ENABLED=true Z_CONFIG_SERVER_ADDR=127.0.0.1:8848 \
 Z_RPC_ENABLED=true Z_RPC_SERVER_PORT=20880 \
-  java -jar z-camuda-admin/target/z-camuda-admin-1.0.6-exec.jar
+  java -jar z-camuda-admin/target/z-camuda-admin-1.0.7-exec.jar
 ```
 
 启动后 REST 基址 `http://localhost:8080/api/...`，Knife4j 文档在 `http://localhost:8080/doc.html`
