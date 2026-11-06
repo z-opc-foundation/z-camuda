@@ -17,7 +17,7 @@ Starter，业务方引一条依赖即可嵌入自己的进程；独立部署时�
 | **仓库** | `z-camuda`（Workflow Engine） |
 | **Maven 坐标** | `io.github.yuku123:z-camuda:${revision}`（聚合 POM，`packaging=pom`） |
 | **当前版本** | `1.0.6`（根 POM `<revision>`，CI-friendly versions + `flatten-maven-plugin` `oss` 模式） |
-| **父项目** | `io.github.yuku123:z-boot-parent:1.2.1`（`<relativePath/>` 留空，parent 在 repo1 不在磁盘；1.0.19 起全组织统一走该 parent，本仓不再是自包含根 POM） |
+| **父项目** | `io.github.yuku123:z-boot-parent:1.2.2`（`<relativePath/>` 留空，parent 在 repo1 不在磁盘；1.0.19 起全组织统一走该 parent，本仓不再是自包含根 POM） |
 | **Maven Central** | 已发布：`z-camuda` / `z-camuda-core` / `z-camuda-web` / `z-camuda-starter` 的 `1.0.6` 均可从 repo1 拉取；`z-camuda-admin:1.0.6` 返回 404（设计上不发 Central） |
 | **默认端口** | `8080`（`SERVER_PORT`），`server.servlet.context-path` 默认 `/`（`SERVER_CONTEXT_PATH`）；`z-rpc` 端口默认 `20880` |
 | **运行口径** | Java 17 · Spring Boot 3.3.13（库模块经父链地板；`z-camuda-admin` 自带 `spring-boot-starter-parent` 钉 2.7.12） · Camunda BPM 7.18.0 |
@@ -56,7 +56,7 @@ Starter，业务方引一条依赖即可嵌入自己的进程；独立部署时�
 
 ```
 z-camuda/
-├── pom.xml                # 根聚合 POM：继承 z-boot-parent:1.2.1，<revision> 统一版本，camunda-bom 在本仓 import
+├── pom.xml                # 根聚合 POM：继承 z-boot-parent:1.2.2，<revision> 统一版本，camunda-bom 在本仓 import
 ├── z-camuda-core/             # Camunda 封装 + 3 个钩子接口 + 22 个 SPI 扩展接口 + @CamudaSpi + CamudaSpiRegistry + LeaveProcessService
 ├── z-camuda-web/              # REST API：7 个 Controller（Group/ApprovalCenter/TaskOperation/ProcessOperation/ProcessModel/LeaveProcess/CamudaBaseHealth）+ DTO/VO（依赖 core、z-util-core、swagger-annotations provided）
 ├── z-camuda-starter/          # 自动装配 + z-config/z-rpc 可选集成 + RPC 暴露 + audit SPI 夹具 + 示例流程
@@ -110,8 +110,8 @@ z-camuda/
 mvn clean install -DskipTests
 ```
 
-第三方与兄弟仓版本由 `z-boot-parent:1.2.1` 供给（第三方地板与兄弟仓权威表均已并入 parent 自身），
-模块 POM 不再出现字面版本钉；若构建报找不到版本，先确认能解析到 `io.github.yuku123:z-boot-parent:1.2.1`。
+第三方与兄弟仓版本由 `z-boot-parent:1.2.2` 供给（第三方地板与兄弟仓权威表均已并入 parent 自身），
+模块 POM 不再出现字面版本钉；若构建报找不到版本，先确认能解析到 `io.github.yuku123:z-boot-parent:1.2.2`。
 
 ### 作为依赖嵌入业务方（Starter）
 
